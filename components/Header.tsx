@@ -272,7 +272,7 @@ const Header = () => {
                 className='w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center'
               >
                 <FaEthereum className='mr-2' />
-                <span>Deposit 32 ETH</span>
+                <span>Deposit 32 ETH (new validator)</span>
               </button>
               <button
                 onClick={() => openWalletModal('acceptExit')}
