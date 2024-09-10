@@ -78,18 +78,18 @@ const WebhooksTable = () => {
   return (
     <div className='overflow-x-auto relative'>
       <button
-        className='absolute top-1 right-1 bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors duration-300'
+        className='absolute top-3 right-3  bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors duration-300'
         onClick={() => setIsModalOpen(true)}
         title='Add Webhook'
       >
         <span className='text-xl font-bold'>+</span>
       </button>
       <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-        <thead className='bg-gray-200'>
+      <thead className='bg-gray-900 h-12'>
           <tr>
-            <th className='px-4 py-2 text-left text-gray-700'>Event Type</th>
-            <th className='px-4 py-2 text-left text-gray-700'>URL</th>
-            <th className='px-4 py-2 text-left text-gray-700'></th>
+            <th className='px-4 py-2 text-left text-gray-100'>Event Type</th>
+            <th className='px-4 py-2 text-left text-gray-100'>URL</th>
+            <th className='px-4 py-2 text-left text-gray-100'></th>
           </tr>
         </thead>
         <tbody>

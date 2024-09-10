@@ -120,14 +120,14 @@ const ValidatorsTable = () => {
         </div>
       ) : (
         <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-          <thead className='bg-gray-200'>
+        <thead className='bg-gray-900 h-12'>
             <tr>
-              <th className='px-4 py-2 text-left text-gray-700'>Select</th>
-              <th className='px-4 py-2 text-left text-gray-700'>Validator index</th>
-              <th className='px-4 py-2 text-left text-gray-700'>Public Key</th>
-              <th className='px-4 py-2 text-left text-gray-700'>Status</th>
-              <th className='px-4 py-2 text-left text-gray-700'>Balance</th>
-              <th className='px-4 py2 text-left text-gray-700'>Estimated exit time</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Select</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Validator index</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Public Key</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Status</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Balance</th>
+              <th className='px-4 py-2 text-left text-gray-100'>Estimated exit time</th>
             </tr>
           </thead>
           <tbody>
