@@ -77,17 +77,24 @@ const WebhookForm = ({
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <div className='mb-4'>
-          <div className='flex items-center'>
-            <h1 className='text-2xl font-bold'>Register Webhook</h1>
+      <form onSubmit={handleSubmit} >
+        <div className='mb-6'>
+          <div className='flex items-center justify-between'>
+            <h1 className='text-3xl font-semibold text-gray-800'>Register Webhook</h1>
+            <button
+              type='button'
+              onClick={onClose}
+              className='text-gray-500 hover:text-gray-700 transition duration-150'
+            >
+              &times;
+            </button>
           </div>
           <div className='h-px w-full bg-gray-300 my-4'></div>
-          <label className='block mb-2'>URL</label>
+          <label className='block mb-2 text-gray-700 font-medium'>URL</label>
           <div className='relative'>
             <input
               type='text'
-              className='p-2 border rounded w-full pr-10'
+              className='p-3 border rounded w-full pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500'
               value={url}
               onChange={e => setUrl(e.target.value)}
               required
@@ -97,27 +104,32 @@ const WebhookForm = ({
               alt='Mascot'
               width={24}
               height={24}
-              className={`absolute right-4 top-2 cursor-pointer ${url.startsWith('https://blobhook.com/api/in') ? 'animate-float' : 'filter grayscale'}`}
+              className={`absolute right-4 top-3 cursor-pointer ${url.startsWith('https://blobhook.com/api/in') ? 'animate-float' : 'filter grayscale'}`}
               title='Powered by Blobhook'
               onClick={handleRegenerateUrl}
             />
           </div>
         </div>
         
-        <div className='mb-4'>
-          <label className='block mb-2'>Auth Token</label>
+        <div className='mb-6'>
+          <label className='block mb-2 text-gray-700 font-medium'>Auth Token</label>
           <input
             type='text'
-            className='p-2 border rounded w-full'
+            className='p-3 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500'
             value={authToken}
             onChange={e => setAuthToken(e.target.value)}
             required
           />
         </div>
-        <div className='mb-4'>
-          <label className='block mb-2'>Webhook Types</label>
-          <div className='space-y-2'>
-            {['RFQBidReceived', 'RFQEscrowEvent', 'RFQTransferProposalReceived', 'RFQEscrowReleased'].map(type => (
+        <div className='mb-6'>
+          <label className='block mb-2 text-gray-700 font-medium'>Webhook Types</label>
+          <div className='space-y-3'>
+            {[
+              { type: 'RFQBidReceived', description: 'Triggered when a new bid is received for an RFQ' },
+              { type: 'RFQEscrowEvent', description: 'Triggered when there is an event related to the RFQ escrow' },
+              { type: 'RFQTransferProposalReceived', description: 'Triggered when a transfer proposal is received for an RFQ' },
+              { type: 'RFQEscrowReleased', description: 'Triggered when the RFQ escrow is released' }
+            ].map(({ type, description }) => (
               <div key={type} className='flex items-center'>
                 <input
                   type='checkbox'
@@ -125,9 +137,12 @@ const WebhookForm = ({
                   value={type}
                   checked={selectedWebhookTypes.includes(type)}
                   onChange={() => handleWebhookTypeChange(type)}
-                  className='mr-2'
+                  className='mr-3 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
                 />
-                <label htmlFor={type}>{type.replace('RFQ', '')}</label>
+                <label htmlFor={type} className='flex items-center text-gray-700'>
+                  {type.replace('RFQ', '')}
+                  <span className='text-gray-500 text-sm ml-2'>{description}</span>
+                </label>
               </div>
             ))}
           </div>
@@ -135,7 +150,7 @@ const WebhookForm = ({
         <div className='flex justify-center'>
           <button
             type='submit'
-            className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50'
+            className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 disabled:opacity-50'
             disabled={isLoading || !authToken || !url || selectedWebhookTypes.length === 0} // Disable button while loading or if any field is empty
           >
             {isLoading ? 'Registering...' : 'Register Webhooks'}
