@@ -32,7 +32,12 @@ const ValidatorsTable = () => {
 
         const result = await response.json()
         if (result.success) {
-          setValidators(result.validators)
+          //if validators is a proper array of ValidatorInfo objects, setValidators to it, otherwise make a toast error
+          if (Array.isArray(result.validators)) {
+            setValidators(result.validators)
+          } else {
+            toast.error('Failed to fetch validators')
+          }
         } else {
           console.error(result.error)
         }
@@ -120,7 +125,7 @@ const ValidatorsTable = () => {
         </div>
       ) : (
         <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-        <thead className='bg-gray-900 h-12'>
+          <thead className='bg-gray-900 h-12'>
             <tr>
               <th className='px-4 py-2 text-left text-gray-100'>Select</th>
               <th className='px-4 py-2 text-left text-gray-100'>Validator index</th>
@@ -131,7 +136,7 @@ const ValidatorsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {validators.map(validator => (
+            {validators?.map(validator => (
               <tr key={validator.validator_public_key} className='border-b border-gray-200 hover:bg-gray-100'>
                 <td className='px-4 py-2'>
                   <input
@@ -200,7 +205,7 @@ const ValidatorsTable = () => {
             <p className='text-sm text-gray-600 mb-4'>
               Please select the wallet where the escrow/accepted bid will be paid out to.
             </p>
-            
+
             <div className='mb-6'>
               <label htmlFor='wallet-select' className='block text-sm font-medium text-gray-700 mb-2'>
                 Select Payment Wallet
@@ -209,7 +214,7 @@ const ValidatorsTable = () => {
                 id='wallet-select'
                 className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500'
                 value={selectedWallet || ''}
-                onChange={(e) => setSelectedWallet(e.target.value)}
+                onChange={e => setSelectedWallet(e.target.value)}
               >
                 <option value=''>Choose a wallet</option>
                 {wallets.map(wallet => (
@@ -225,19 +230,33 @@ const ValidatorsTable = () => {
               <table className='min-w-full divide-y divide-gray-200'>
                 <thead className='bg-gray-50'>
                   <tr>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Index</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Public Key</th>
-                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Balance</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Index
+                    </th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Public Key
+                    </th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                      Balance
+                    </th>
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200'>
-                  {validators.filter(v => selectedValidators.has(v.validator_index?.toString() ?? '')).map(validator => (
-                    <tr key={validator.validator_public_key}>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{validator.validator_index}</td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{validator.validator_public_key?.substring(0, 10)}...</td>
-                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{Number(validator.balance) / 1000000000} ETH</td>
-                    </tr>
-                  ))}
+                  {validators
+                    .filter(v => selectedValidators.has(v.validator_index?.toString() ?? ''))
+                    .map(validator => (
+                      <tr key={validator.validator_public_key}>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                          {validator.validator_index}
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                          {validator.validator_public_key?.substring(0, 10)}...
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                          {Number(validator.balance) / 1000000000} ETH
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -254,7 +273,6 @@ const ValidatorsTable = () => {
           </div>
         </Modal>
       )}
-    
     </div>
   )
 }

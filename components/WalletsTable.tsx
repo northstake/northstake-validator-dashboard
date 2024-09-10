@@ -100,7 +100,7 @@ const WalletsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {wallets.map(wallet => (
+          {wallets?.map(wallet => (
             <tr key={wallet.id} className='border-b border-gray-200 hover:bg-gray-100'>
               <td className='px-4 py-2'>{wallet.walletName}</td>
               <td className='px-4 py-2 text-sm text-blue-500'>

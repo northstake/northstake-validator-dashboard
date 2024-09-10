@@ -6,7 +6,14 @@ import { toast } from 'react-toastify'
 
 // New component for expanded content
 const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
-  const steps = rfq.settlement_steps
+  //make an array of all settlement steps
+  const steps = Object.entries(rfq.settlement_steps || {})
+
+
+  const sortedSteps = steps.sort((a, b) => {
+    return a[0].localeCompare(b[0])
+  })
+
   const { api } = useApi()
 
   const getEtherscanLink = (txHash: string) => {
@@ -18,9 +25,8 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
     <tr>
       <td colSpan={6}>
         <div className='p-4 bg-gray-50'>
-          <h4 className='font-bold mb-2'>Settlement Steps</h4>
-          {steps &&
-            Object.entries(steps).map(([stepName, stepData]) => (
+          {sortedSteps &&
+            sortedSteps.map(([stepName, stepData]) => (
               <div key={stepName} className='mb-2'>
                 <h5 className='font-semibold'>
                   {stepName.replace(/_/g, ' ').charAt(0).toUpperCase() + stepName.replace(/_/g, ' ').slice(1)}
@@ -82,7 +88,7 @@ const RFQsTable = () => {
       })
 
       const result = await response.json()
-      if (result.success) {
+      if (result.success && Array.isArray(result.documents)) {
         // Order RFQs by active status first
         const orderedRFQs = result.documents.sort((a: RFQDocumentSeller, b: RFQDocumentSeller) => {
           if (a.status.toLowerCase() === 'active' && b.status.toLowerCase() !== 'active') {
@@ -258,7 +264,7 @@ const RFQsTable = () => {
         </div>
       ) : (
         <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-        <thead className='bg-gray-900 h-12'>
+          <thead className='bg-gray-900 h-12'>
             <tr>
               <th className='px-4 py-2 text-left text-gray-100'>Validators</th>
               <th className='px-4 py-2 text-left text-gray-100'>Status</th>
@@ -270,11 +276,11 @@ const RFQsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredRFQs.map(rfq => (
+            {filteredRFQs?.map(rfq => (
               <React.Fragment key={rfq.id}>
                 <tr className='border-b border-gray-200 hover:bg-gray-100'>
                   <td className='px-4 py-2'>
-                    {rfq.validators.map((v, index) => (
+                    {rfq.validators?.map((v, index) => (
                       <React.Fragment key={v.validator_index}>
                         <a
                           href={`https://${api?.server === 'production' ? '' : 'holesky.'}beaconcha.in/validator/${
@@ -301,7 +307,8 @@ const RFQsTable = () => {
                         {loadingQuoteId === rfq.best_quote?.quote_id ? (
                           <div className='ml-2 loader'></div>
                         ) : (
-                          rfq.status.toLowerCase() === 'active' && !rfq.settlement_steps?.accepted_quote && (
+                          rfq.status.toLowerCase() === 'active' &&
+                          !rfq.settlement_steps?.accepted_quote && (
                             <>
                               <button
                                 disabled={!rfq.best_quote?.quote_id}

@@ -93,7 +93,7 @@ const WebhooksTable = () => {
           </tr>
         </thead>
         <tbody>
-          {webhooks.map(webhook => (
+          {webhooks?.map(webhook => (
             <tr key={webhook.id} className='border-b border-gray-200 hover:bg-gray-100'>
               <td className='px-4 py-2'>{webhook.eventType}</td>
               <td className='px-4 py-2 text-sm'>

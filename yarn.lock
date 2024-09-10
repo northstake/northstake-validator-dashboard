@@ -1099,10 +1099,10 @@
   resolved "https://registry.yarnpkg.com/@nolyfill/is-core-module/-/is-core-module-1.0.39.tgz#3dc35ba0f1e66b403c00b39344f870298ebb1c8e"
   integrity sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==
 
-"@northstake/northstakeapi@^1.0.20":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@northstake/northstakeapi/-/northstakeapi-1.0.20.tgz#105509595f695120e672e456724b819c88b67752"
-  integrity sha512-aWU3oP6VXQjqh1w0JxduDUXUfcII7XSlMLjoTv/nGgAaSbszsKrMSKOR9vKvLHXYPuytFiENiLmkQ8geM0KNpA==
+"@northstake/northstakeapi@^1.0.21":
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/@northstake/northstakeapi/-/northstakeapi-1.0.21.tgz#1d3ae4a9b75f291228fddbe276f0d1e32dfa13cd"
+  integrity sha512-gv0i1DspPRimpxk5tdnbO2oEswiu+kwNfDu64CCzvJMDBkPZJ0spoY9jOfKuqWZodQPPl4h8+K0T270RHa+fWA==
   dependencies:
     base-64 "^1.0.0"
     js-yaml "^4.1.0"
