@@ -98,6 +98,24 @@ const Header = () => {
     }
   }, [])
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        closeWalletModal();
+      }
+    };
+
+    if (walletModalOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [walletModalOpen]);
+
   const connectToMetaMask = async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
@@ -248,7 +266,7 @@ const Header = () => {
 
       {walletModalOpen && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white text-black rounded-lg shadow-lg p-6 w-96'>
+  <div ref={modalRef} className='bg-white text-black rounded-lg shadow-lg p-6 w-96'>
             {isMetaMaskConnected && (
               <div className='flex items-center justify-between mb-4' title='Available Rewards'>
                 <div className='flex items-center'>
@@ -288,6 +306,18 @@ const Header = () => {
             >
               Close
             </button>
+            {userInfo?.smartContracts?.[0]?.address && (
+              <div className='mt-4 text-center'>
+                <a
+                  href={`${etherscanUrl}${userInfo.smartContracts[0].address}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-500 hover:text-blue-700 underline text-sm'
+                >
+                  View Smart Contract on Etherscan
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )}
