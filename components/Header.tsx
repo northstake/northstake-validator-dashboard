@@ -169,7 +169,7 @@ const Header = () => {
           <option value='production'>Production</option>
         </select>
       </div>
-      <div className='flex justify-center'>{isMounted && address ? address.toString() : ''}</div>
+   
       <div className='flex items-center'>
         <button
           className={`ml-4 p-2 rounded flex items-center ${isConnected ? 'text-white' : 'text-gray-500'}`}
