@@ -3,6 +3,7 @@ import { useApi } from '../context/ApiContext'
 import { ValidatorInfo, CreateRFQRequest, Wallet } from '@northstake/northstakeapi'
 import { toast } from 'react-toastify'
 import Modal from './Modal'
+import { FaWallet, FaTimes } from 'react-icons/fa'
 
 const ValidatorsTable = () => {
   const [validators, setValidators] = useState<ValidatorInfo[]>([])
@@ -184,34 +185,72 @@ const ValidatorsTable = () => {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <div className='p-4'>
-            <h2 className='text-lg font-bold mb-2'>Select Payment Wallet</h2>
-            <h3 className='text-sm text-gray-600 mb-4'>
-              This is the wallet where the escrow/accepted bid will be paid out to
-            </h3>
-            <ul>
-              {wallets.map(wallet => (
-                <li key={wallet.id} className='mb-2'>
-                  <button
-                    className={`w-full text-left p-2 border rounded ${
-                      selectedWallet === wallet.id ? 'bg-blue-100' : ''
-                    }`}
-                    onClick={() => setSelectedWallet(wallet.id)}
-                  >
+          <div className='p-6 bg-white rounded-lg shadow-md'>
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-2xl font-semibold text-gray-800'>
+                <FaWallet className='inline-block mr-2' /> Create RFQ
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className='text-gray-500 hover:text-gray-700 transition duration-150'
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <p className='text-sm text-gray-600 mb-4'>
+              Please select the wallet where the escrow/accepted bid will be paid out to.
+            </p>
+            
+            <div className='mb-6'>
+              <label htmlFor='wallet-select' className='block text-sm font-medium text-gray-700 mb-2'>
+                Select Payment Wallet
+              </label>
+              <select
+                id='wallet-select'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500'
+                value={selectedWallet || ''}
+                onChange={(e) => setSelectedWallet(e.target.value)}
+              >
+                <option value=''>Choose a wallet</option>
+                {wallets.map(wallet => (
+                  <option key={wallet.id} value={wallet.id}>
                     {wallet.walletName} - {wallet.walletAddress}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              className='mt-4 bg-green-500 text-white px-4 py-2 rounded disabled:opacity-50'
-              onClick={() => {
-                handleCreateRFQ()
-              }}
-              disabled={!selectedWallet}
-            >
-              Confirm
-            </button>
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <h3 className='text-lg font-semibold text-gray-800 mb-2'>Selected Validators</h3>
+            <div className='max-h-60 overflow-y-auto mb-4'>
+              <table className='min-w-full divide-y divide-gray-200'>
+                <thead className='bg-gray-50'>
+                  <tr>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Index</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Public Key</th>
+                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Balance</th>
+                  </tr>
+                </thead>
+                <tbody className='bg-white divide-y divide-gray-200'>
+                  {validators.filter(v => selectedValidators.has(v.validator_index?.toString() ?? '')).map(validator => (
+                    <tr key={validator.validator_public_key}>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{validator.validator_index}</td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{validator.validator_public_key?.substring(0, 10)}...</td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>{Number(validator.balance) / 1000000000} ETH</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className='flex justify-end mt-6'>
+              <button
+                className='bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 disabled:opacity-50'
+                onClick={handleCreateRFQ}
+                disabled={!selectedWallet}
+              >
+                Create RFQ
+              </button>
+            </div>
           </div>
         </Modal>
       )}

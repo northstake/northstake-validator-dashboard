@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { v4 as uuidv4 } from 'uuid' // Import UUID library
 import Image from 'next/image' // Import Image component for the icon
+import { FaLink } from 'react-icons/fa'
 
 
 const WebhookForm = ({
@@ -77,10 +78,12 @@ const WebhookForm = ({
 
   return (
     <>
-      <form onSubmit={handleSubmit} >
+      <form onSubmit={handleSubmit} className='bg-white p-6 rounded-lg shadow-md'>
         <div className='mb-6'>
           <div className='flex items-center justify-between'>
-            <h1 className='text-3xl font-semibold text-gray-800'>Register Webhook</h1>
+            <h1 className='text-3xl font-semibold text-gray-800 flex items-center'>
+              <FaLink className='mr-2' /> Register Webhook
+            </h1>
             <button
               type='button'
               onClick={onClose}
