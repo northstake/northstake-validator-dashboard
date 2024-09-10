@@ -1,12 +1,12 @@
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
-interface SidebarProps {
-  activeSection: 'overview' | 'rfqs'
 
-}
 
-const Sidebar: React.FC<SidebarProps> = ({ activeSection }) => {
+const Sidebar: React.FC = () => {
+  const router = useRouter()
+  const activeSection = router.pathname.replace('/', '') as 'overview' | 'rfqs'
   const navItems = [
     { id: 'overview', label: 'Overview', icon: '📊', href: '/overview' },
     { id: 'rfqs', label: 'RFQs', icon: '📄', href: '/rfq' }
