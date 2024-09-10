@@ -279,7 +279,7 @@ const Header = () => {
                 className='w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center'
               >
                 <FaEthereum className='mr-2' />
-                <span>Accept Exit</span>
+                <span>Accept exit proposal</span>
               </button>
             </div>
             <button
