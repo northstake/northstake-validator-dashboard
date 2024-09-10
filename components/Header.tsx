@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react'
-import { useApi } from '../context/ApiContext'
-import { AccountEntity } from '@northstake/northstakeapi'
+import { useUser } from '@/context/userContext'
 import { FaUserCircle, FaEthereum, FaCoins } from 'react-icons/fa'
 import LogoutButton from './Logoutbutton'
 import { ethers } from 'ethers'
@@ -11,54 +10,20 @@ import { useConnect, useAccount, useDisconnect, useWriteContract, useWaitForTran
 import { readContract } from '@wagmi/core'
 import { config } from '@/config/wagmi'
 
-// ABI of the smart contract
-const contractABI = [
-  {
-    inputs: [],
-    name: 'deposit',
-    outputs: [],
-    stateMutability: 'payable',
-    type: 'function'
-  },
-  {
-    inputs: [{ internalType: 'bytes32', name: 'proposalId', type: 'bytes32' }],
-    name: 'acceptExit',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'collectRewards',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'rewards',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function'
-  }
-]
-
 const Header = () => {
-  const { api } = useApi()
+  const { userInfo, contractAddress, contractABI } = useUser()
   const { connect, connectors } = useConnect()
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: hash, isPending, writeContract, isError } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash })
 
-  const [userInfo, setUserInfo] = useState<AccountEntity | null>(null)
   const [server, setServer] = useState('test')
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [availableRewards, setAvailableRewards] = useState<string>('0')
-  const [contractAddress, setContractAddress] = useState<`0x${string}` | null>(null)
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -72,11 +37,15 @@ const Header = () => {
       address: contractAddress as `0x${string}`,
       abi: contractABI,
       functionName: 'deposit',
-      args: [ethers.parseEther('32')]
+      args: [],
+      value: ethers.parseEther('32')
+      
     })
   }
 
   const acceptExitFromContract = (proposalId: string) => {
+    //we need to turn the proposalId into a bytes32
+ 
     writeContract({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
@@ -113,74 +82,10 @@ const Header = () => {
 
   useEffect(() => {
     if (isError) {
-      //clear all other toast notifications
       toast.dismiss()
       toast.error('Transaction rejected in wallet!')
     }
   }, [isError])
-
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (api) {
-        try {
-          const response = await fetch('/api/user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              apiKey: api.apiKey,
-              privateKey: api.privateKey,
-              server: api.server
-            })
-          })
-          const data = await response.json()
-          setUserInfo(data.user)
-        } catch (error) {
-          console.error('Failed to fetch user information', error)
-        }
-      }
-    }
-    fetchUserInfo()
-  }, [api])
-
-  useEffect(() => {
-    if (isConnected && userInfo?.smartContracts?.[0]?.address) {
-      console.log('SETTING CONTRACT ADDRESS', userInfo.smartContracts[0].address)
-      setContractAddress(userInfo.smartContracts[0].address as `0x${string}`)
-    }
-  }, [isConnected, userInfo])
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
-  /* const modalRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        closeWalletModal()
-      }
-    }
-
-    if (walletModalOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [walletModalOpen]) */
 
   useEffect(() => {
     if (isConnected && contractAddress) {
@@ -188,26 +93,6 @@ const Header = () => {
       updateRewards()
     }
   }, [isConnected, contractAddress])
-
-  /*   const handleConnectWallet = async () => {
-    console.log('isConnected', isConnected)
-    console.log(connectors)
-    if (isConnected) {
-      setWalletModalOpen(true)
-    } else {
-      const walletConnectConnector = connectors.find(connector => connector.type === 'walletConnect')
-
-      if (walletConnectConnector) {
-        console.log('walletConnectConnector', walletConnectConnector)
-        try {
-          await connect({ connector: walletConnectConnector })
-        } catch (error) {
-          console.error('Failed to connect wallet', error)
-          toast.error('Failed to connect wallet. Please try again.')
-        }
-      }
-    }
-  } */
 
   const handleServerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setServer(e.target.value)
@@ -263,6 +148,7 @@ const Header = () => {
     console.log('rewards', output)
     setAvailableRewards(ethers.formatEther(output as bigint))
   }
+
   const handleCollectRewards = () => {
     try {
       const result = collectRewardsFromContract()
@@ -301,7 +187,7 @@ const Header = () => {
             {dropdownOpen && (
               <div className='absolute right-0 mt-2 w-56 bg-white text-black rounded-lg shadow-lg py-2'>
                 <p className='px-4 py-2 border-b border-gray-200 text-sm'>{`${userInfo?.email}`}</p>
-                <p className='px-4 py-2 border-b border-gray-200 text-sm'>{`API Key: ${api?.apiKey}`}</p>
+   
                 <p className='px-4 py-2 text-sm'>
                   <a
                     href={`${etherscanUrl}${userInfo?.smartContracts?.[0]?.address}`}

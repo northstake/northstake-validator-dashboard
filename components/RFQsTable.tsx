@@ -1,26 +1,55 @@
 import { useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
+
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
 import React from 'react'
 import { toast } from 'react-toastify'
+import { useWriteContract } from 'wagmi'
+import { useUser } from '@/context/userContext'
+
 
 // New component for expanded content
 const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
-  //make an array of all settlement steps
+  // Make an array of all settlement steps
   const steps = Object.entries(rfq.settlement_steps || {})
-
 
   const sortedSteps = steps.sort((a, b) => {
     return a[0].localeCompare(b[0])
   })
 
   const { api } = useApi()
+  const { contractAddress, contractABI } = useUser()
+  const { writeContract } = useWriteContract()
 
   const getEtherscanLink = (txHash: string) => {
     const baseUrl = api?.server === 'production' ? 'https://etherscan.io' : 'https://holesky.etherscan.io'
     return `${baseUrl}/tx/${txHash}`
   }
 
+  const handleProposalExit = async (proposalId: string) => {
+    if (!api) {
+      toast.error('No API credentials found')
+      return
+    }
+
+    try {
+  
+
+      await writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: contractABI,
+        functionName: 'acceptExit',
+        args: [proposalId]
+      })
+      toast.success('Proposal exit transaction sent successfully to ' + contractAddress)
+    } catch (error) {
+      console.log(error)
+      toast.error('Failed to send proposal exit transaction')
+    }
+  }
+
+  //function to check whether we have a step that is named Withdrawal recipient settlement
+  const hasWithdrawalRecipientSettlement = sortedSteps.some(step => step[0] === 'withdrawal_recipient_settlement')
   return (
     <tr>
       <td colSpan={6}>
@@ -37,7 +66,7 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
                     Object.entries(stepData).map(([key, value]) => (
                       <li key={key}>
                         {key}:{' '}
-                        {typeof value === 'string' && value.startsWith('0x') && value.length === 66 ? (
+                        {typeof value === 'string' && value.startsWith('0x') && key !== 'proposal_id' && value.length === 66 ? (
                           <a
                             href={getEtherscanLink(value)}
                             target='_blank'
@@ -52,6 +81,14 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
                           String(value)
                         ) : (
                           ''
+                        )}
+                        {key === 'proposal_id' && !hasWithdrawalRecipientSettlement && (
+                          <button
+                            onClick={() => handleProposalExit(value as string)}
+                            className='ml-2 text-green-600 hover:text-green-800'
+                          >
+                           Accept exit proposal
+                          </button>
                         )}
                       </li>
                     ))}
@@ -257,7 +294,7 @@ const RFQsTable = () => {
               strokeLinecap='round'
               strokeLinejoin='round'
               strokeWidth={2}
-              d='M9 12h6m2 0a2 2 0 100-4H7a2 2 0 100 4h10zm0 0a2 2 0 110 4H7a2 2 0 110-4h10z'
+              d='M9 12h6m2 0a2 2 0 100-4H7a2 2 0 100 4h10zm0 0a2 2 2 0 110 4H7a2 2 0 110-4h10z'
             />
           </svg>
           <p className='text-gray-500 mt-2'>No active RFQs</p>
@@ -399,3 +436,4 @@ const RFQsTable = () => {
 }
 
 export default RFQsTable
+           
