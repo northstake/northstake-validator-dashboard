@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useApi } from '../context/ApiContext'
 import { AccountEntity } from '@northstake/northstakeapi'
-import { FaUserCircle, FaEthereum } from 'react-icons/fa'
+import { FaUserCircle, FaEthereum, FaCoins } from 'react-icons/fa'
 import LogoutButton from './Logoutbutton'
 import { Eip1193Provider, ethers } from 'ethers'
 import { toast } from 'react-toastify'
@@ -37,6 +37,13 @@ const contractABI = [
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'rewards',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function'
   }
 ]
 
@@ -51,6 +58,7 @@ const Header = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [isMetaMaskConnected, setIsMetaMaskConnected] = useState(false)
+  const [availableRewards, setAvailableRewards] = useState<string>('0')
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -102,6 +110,7 @@ const Header = () => {
         if (contractAddress) {
           const contract = new ethers.Contract(contractAddress, contractABI, signer)
           setContract(contract)
+          await updateRewards(contract)
         }
       } catch (error) {
         console.error('Failed to connect to MetaMask', error)
@@ -170,6 +179,28 @@ const Header = () => {
     }
   }
 
+  const updateRewards = async (contract: ethers.Contract) => {
+    try {
+      const rewards = await contract.rewards()
+      setAvailableRewards(ethers.formatEther(rewards))
+    } catch (error) {
+      console.error('Failed to fetch rewards', error)
+    }
+  }
+  const handleCollectRewards = async () => {
+    if (contract) {
+      try {
+        const tx = await contract.collectRewards()
+        await tx.wait()
+        toast.success('Rewards collected successfully!')
+        await updateRewards(contract)
+      } catch (error) {
+        console.error('Collect rewards failed', error)
+        toast.error('Collect rewards failed. Please try again.')
+      }
+    }
+  }
+
   return (
     <div className='bg-gray-900 text-white p-4 flex items-center justify-between'>
       <div className='flex items-center'>
@@ -217,31 +248,43 @@ const Header = () => {
 
       {walletModalOpen && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white text-black rounded-lg shadow-lg p-6 w-80'>
-            <h2 className='text-xl font-bold mb-4'>Wallet Actions</h2>
+          <div className='bg-white text-black rounded-lg shadow-lg p-6 w-96'>
+            {isMetaMaskConnected && (
+              <div className='flex items-center justify-between mb-4' title='Available Rewards'>
+                <div className='flex items-center'>
+                  <FaCoins className='text-yellow-400 mr-2' />
+                  <span className='font-semibold'>{parseFloat(availableRewards).toFixed(4)} ETH</span>
+                </div>
+                <button
+                  onClick={handleCollectRewards}
+                  className='bg-yellow-500 hover:bg-yellow-600 text-white rounded-full p-2 flex items-center'
+                  title='Withdraw Rewards'
+                >
+                  <FaCoins className='text-lg' />
+                  <span className='ml-2'>Withdraw</span>
+                </button>
+              </div>
+            )}
+            <h2 className='text-2xl font-bold mb-6'>Wallet Actions</h2>
             <div className='space-y-4'>
               <button
                 onClick={() => openWalletModal('deposit')}
-                className='w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+                className='w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center'
               >
-                Deposit 32 ETH
+                <FaEthereum className='mr-2' />
+                <span>Deposit 32 ETH</span>
               </button>
               <button
                 onClick={() => openWalletModal('acceptExit')}
-                className='w-full p-2 bg-green-500 text-white rounded hover:bg-green-600'
+                className='w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center'
               >
-                Accept Exit
-              </button>
-              <button
-                onClick={() => openWalletModal('collectRewards')}
-                className='w-full p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600'
-              >
-                Collect Rewards
+                <FaEthereum className='mr-2' />
+                <span>Accept Exit</span>
               </button>
             </div>
             <button
               onClick={closeWalletModal}
-              className='mt-4 w-full p-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400'
+              className='mt-6 w-full p-3 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400'
             >
               Close
             </button>
