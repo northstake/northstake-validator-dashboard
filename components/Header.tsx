@@ -13,7 +13,7 @@ import { config } from '@/config/wagmi'
 const Header = () => {
   const { userInfo, contractAddress, contractABI } = useUser()
   const { connect, connectors } = useConnect()
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: hash, isPending, writeContract, isError } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash })
@@ -24,11 +24,8 @@ const Header = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [availableRewards, setAvailableRewards] = useState<string>('0')
-  const [isMounted, setIsMounted] = useState(false)
 
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
+
 
   const depositToContract = () => {
     alert('Depositing to contract')
