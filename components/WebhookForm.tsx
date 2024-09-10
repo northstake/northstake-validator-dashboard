@@ -16,7 +16,7 @@ const WebhookForm = ({
   const { api } = useApi()
   const [authToken, setAuthToken] = useState('secret-key-here') // Prefill auth token
   const [url, setUrl] = useState('')
-  const [webhookType, setWebhookType] = useState('RFQBidReceived') // Add webhook type state
+  const [selectedWebhookTypes, setSelectedWebhookTypes] = useState<string[]>([]) // Change to array
   const [isLoading, setIsLoading] = useState(false) // Add loading state
 
   useEffect(() => {
@@ -32,38 +32,47 @@ const WebhookForm = ({
     e.preventDefault()
     if (api) {
       setIsLoading(true) // Start loading
-      const response = await fetch('/api/registerWebhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          apiKey: api.apiKey,
-          privateKey: api.privateKey,
-          server: api.server,
-          authToken,
-          url,
-          webhookType
-        })
-      })
+      const promises = selectedWebhookTypes.map(webhookType =>
+        fetch('/api/registerWebhook', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            apiKey: api.apiKey,
+            privateKey: api.privateKey,
+            server: api.server,
+            authToken,
+            url,
+            webhookType
+          })
+        }).then(response => response.json())
+      )
 
-      const result = await response.json()
+      const results = await Promise.all(promises)
       setIsLoading(false) // Stop loading
-      if (result.success) {
-        if (result.result.status === 400) {
-          toast.error('Webhook already exists')
-          onClose()
-        } else {
-          toast.success('Webhook registered successfully')
-          onWebhookAdded(true)
-          onClose()
-        }
-      } else {
-        console.error(result.error)
-        toast.error('An error occurred while registering the webhook')
+
+      const allSuccessful = results.every(result => result.success && result.result.status !== 400)
+      if (allSuccessful) {
+        toast.success('Webhooks registered successfully')
+        onWebhookAdded(true)
         onClose()
+      } else {
+        const errors = results.filter(result => !result.success || result.result.status === 400)
+        if (errors.length === results.length) {
+          toast.error('Failed to register webhooks')
+        } else {
+          toast.warning('Some webhooks were not registered')
+        }
+        console.error(errors)
       }
     }
+  }
+
+  const handleWebhookTypeChange = (type: string) => {
+    setSelectedWebhookTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    )
   }
 
   return (
@@ -106,26 +115,30 @@ const WebhookForm = ({
           />
         </div>
         <div className='mb-4'>
-          <label className='block mb-2'>Webhook Type</label>
-          <select
-            className='p-2 border rounded w-full'
-            value={webhookType}
-            onChange={e => setWebhookType(e.target.value)}
-            required
-          >
-            <option value='RFQBidReceived'>Bid received</option>
-            <option value='RFQEscrowEvent'>Escrow payment made</option>
-            <option value='RFQTransferProposalReceived'>Transfer proposal received</option>
-            <option value='RFQEscrowReleased'>Escrow released</option>
-          </select>
+          <label className='block mb-2'>Webhook Types</label>
+          <div className='space-y-2'>
+            {['RFQBidReceived', 'RFQEscrowEvent', 'RFQTransferProposalReceived', 'RFQEscrowReleased'].map(type => (
+              <div key={type} className='flex items-center'>
+                <input
+                  type='checkbox'
+                  id={type}
+                  value={type}
+                  checked={selectedWebhookTypes.includes(type)}
+                  onChange={() => handleWebhookTypeChange(type)}
+                  className='mr-2'
+                />
+                <label htmlFor={type}>{type.replace('RFQ', '')}</label>
+              </div>
+            ))}
+          </div>
         </div>
         <div className='flex justify-center'>
           <button
             type='submit'
             className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 disabled:opacity-50'
-            disabled={isLoading || !authToken || !url || !webhookType} // Disable button while loading or if any field is empty
+            disabled={isLoading || !authToken || !url || selectedWebhookTypes.length === 0} // Disable button while loading or if any field is empty
           >
-            {isLoading ? 'Registering...' : 'Register Webhook'}
+            {isLoading ? 'Registering...' : 'Register Webhooks'}
           </button>
         </div>
         {isLoading && (
