@@ -19,25 +19,13 @@ const Dashboard = ({ activeSection }: { activeSection: 'validators' | 'rfqs' | '
     <main className='main-view flex-1 overflow-x-hidden overflow-y-auto'>
       <div className='container mx-auto p-4'>
         {activeSection === 'validators' ? (
-          <div className='p-4'>
-            <h4 className='text-gray-700 text-lg font-medium mb-4'>Validators</h4>
-            <ValidatorsTable />
-          </div>
+          <ValidatorsTable />
         ) : activeSection === 'rfqs' ? (
-          <div className='p-4'>
-            <h4 className='text-gray-700 text-lg font-medium mb-4'>Active RFQ documents</h4>
-            <RFQsTable />
-          </div>
+          <RFQsTable />
         ) : activeSection === 'wallets' ? (
-          <div className='p-4'>
-            <h4 className='text-gray-700 text-lg font-medium mb-4'>Wallets</h4>
-            <WalletsTable />
-          </div>
+          <WalletsTable />
         ) : (
-          <div className='p-4'>
-            <h4 className='text-gray-700 text-lg font-medium mb-4'>Webhooks</h4>
-            <WebhooksTable />
-          </div>
+          <WebhooksTable />
         )}
       </div>
     </main>

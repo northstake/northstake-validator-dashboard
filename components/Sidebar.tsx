@@ -7,7 +7,7 @@ const Sidebar: React.FC = () => {
   const activeSection = router.pathname.replace('/', '') as 'overview' | 'rfqs'
   const navItems = [
     { id: 'validators', label: 'Validators', icon: '📊', href: '/validators' },
-    { id: 'rfqs', label: 'RFQs', icon: '📄', href: '/rfqs' },
+    { id: 'rfqs', label: 'RFQs', icon: '📄', href: '/rfq' },
     { id: 'wallets', label: 'Wallets', icon: '💼', href: '/wallets' },
     { id: 'webhooks', label: 'Webhooks', icon: '🔗', href: '/webhooks' }
   ]
