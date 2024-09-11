@@ -3,7 +3,7 @@ import { useApi } from '../context/ApiContext'
 import { ValidatorInfo, CreateRFQRequest, Wallet } from '@northstake/northstakeapi'
 import { toast } from 'react-toastify'
 import Modal from './Modal'
-import { FaWallet, FaTimes } from 'react-icons/fa'
+import { FaWallet, FaTimes, FaCopy } from 'react-icons/fa'
 
 const ValidatorsTable = () => {
   const [validators, setValidators] = useState<ValidatorInfo[]>([])
@@ -127,8 +127,8 @@ const ValidatorsTable = () => {
         <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
           <thead className='bg-gray-900 h-12'>
             <tr>
-              <th className='px-4 py-2 text-left text-gray-100'>Select</th>
-              <th className='px-4 py-2 text-left text-gray-100'>Validator index</th>
+              <th className='px-4 py-2 text-left text-gray-100 w-12'>Select</th>
+              <th className='px-2 py-2 text-left text-gray-100 w-24'>Validator index</th>
               <th className='px-4 py-2 text-left text-gray-100'>Public Key</th>
               <th className='px-4 py-2 text-left text-gray-100'>Status</th>
               <th className='px-4 py-2 text-left text-gray-100'>Balance</th>
@@ -145,19 +145,39 @@ const ValidatorsTable = () => {
                     onChange={() => handleCheckboxChange(validator.validator_index?.toString() ?? '')}
                   />
                 </td>
-                <td className='px-4 py-2'>
-                  <a
-                    href={`https://${api?.server === 'test' ? 'holesky.' : ''}beaconcha.in/validator/${
-                      validator.validator_index
-                    }`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-blue-600 hover:underline'
-                  >
-                    {validator.validator_index}
-                  </a>
+                <td className='px-2 py-2'>
+                  {validator.validator_index ? (
+                    <a
+                      href={`https://${api?.server === 'test' ? 'holesky.' : ''}beaconcha.in/validator/${
+                        validator.validator_index
+                      }`}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 hover:underline'
+                    >
+                      {validator.validator_index}
+                    </a>
+                  ) : (
+                    'N/A'
+                  )}
                 </td>
-                <td className='px-4 py-2'>{validator?.validator_public_key?.substring(0, 10)}...</td>
+                <td className='px-4 py-2 flex items-center space-x-2'>
+                  <input
+                    type='text'
+                    value={validator.validator_public_key ?? ''}
+                    readOnly
+                    className='w-full px-2 py-1 border rounded text-gray-700 bg-gray-100'
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(validator.validator_public_key ?? '')
+                      toast.success('Copied to clipboard')
+                    }}
+                    className='text-gray-500 hover:text-gray-200 transition duration-150 ml-2'
+                  >
+                    <FaCopy />
+                  </button>
+                </td>
                 <td className='px-4 py-2'>
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
@@ -169,7 +189,9 @@ const ValidatorsTable = () => {
                     {validator.status as string}
                   </span>
                 </td>
-                <td className='px-4 py-2'>{Number(validator.balance) / 1000000000} ETH</td>
+                <td className='px-4 py-2'>
+                  {isNaN(Number(validator.balance)) ? 'N/A' : `${(Number(validator.balance) / 1000000000).toFixed(5)} ETH`}
+                </td>
                 <td className='px-4 py-2'>
                   {validator.exit_estimate?.estimated_exit_time
                     ? new Date(validator.exit_estimate.estimated_exit_time).toLocaleString()

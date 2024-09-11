@@ -16,7 +16,7 @@ const Dashboard = ({ activeSection }: { activeSection: 'overview' | 'rfqs' }) =>
   }
 
   return (
-    <main className='flex-1 overflow-x-hidden overflow-y-auto bg-gray-200'>
+    <main className='main-view flex-1 overflow-x-hidden overflow-y-auto'>
       <div className='container mx-auto p-4'>
         {activeSection === 'overview' ? (
           <div className='space-y-2'>
