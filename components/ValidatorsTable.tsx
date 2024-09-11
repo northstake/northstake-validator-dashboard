@@ -13,7 +13,7 @@ const ValidatorsTable = () => {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const [validatorsPerPage] = useState(5)
+  const [validatorsPerPage, setValidatorsPerPage] = useState(5)
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: string } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['active', 'activating', 'exited']))
   const { api } = useApi()
@@ -298,6 +298,19 @@ const ValidatorsTable = () => {
               {i + 1}
             </button>
           ))}
+        </div>
+        <div>
+          <label htmlFor='entriesPerPage' className='mr-2'>Entries per page:</label>
+          <select
+            id='entriesPerPage'
+            value={validatorsPerPage}
+            onChange={(e) => setValidatorsPerPage(Number(e.target.value))}
+            className='p-2 border border-gray-300 rounded-md'
+          >
+            {[5, 10, 20, 50].map(number => (
+              <option key={number} value={number}>{number}</option>
+            ))}
+          </select>
         </div>
       </div>
 
