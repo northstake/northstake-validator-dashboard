@@ -143,6 +143,7 @@ const ValidatorsTable = () => {
                     type='checkbox'
                     checked={selectedValidators.has(validator.validator_index?.toString() ?? '')}
                     onChange={() => handleCheckboxChange(validator.validator_index?.toString() ?? '')}
+                    disabled={validator.status !== 'active' as string} // Disable checkbox if validator is not active
                   />
                 </td>
                 <td className='px-2 py-2'>
