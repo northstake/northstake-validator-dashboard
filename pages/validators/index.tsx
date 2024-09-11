@@ -1,5 +1,5 @@
 import Dashboard from '@/components/Dashboard'
 
 export default function OverviewPage() {
-  return <Dashboard activeSection='overview' />
+  return <Dashboard activeSection='validators' />
 }
