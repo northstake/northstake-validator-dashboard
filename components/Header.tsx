@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import { useConnect, useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { readContract } from '@wagmi/core'
 import { config } from '@/config/wagmi'
+import Image from 'next/image'
 
 const Header = () => {
   const { userInfo, contractAddress, contractABI } = useUser()
@@ -155,16 +156,12 @@ const Header = () => {
   }
 
   return (
-    <div className='bg-gray-900 text-white p-4 flex items-center justify-between'>
+    <div className='bg-gray-900 text-white p-2 pr-6 pl-3 flex items-center justify-between'>
       <div className='flex items-center'>
-        <span className='font-bold text-lg'>Northstake Dashboard</span>
-        <select className='ml-4 p-2 bg-gray-700 text-white rounded' value={server} onChange={handleServerChange}>
-          <option value='localhost'>Localhost</option>
-          <option value='test'>Test</option>
-          <option value='production'>Production</option>
-        </select>
+        <Image src='/northstake_2.png' alt='Northstake' width={42} height={42} className='h-12 w-12 mr-2' /> {/* Add your logo here */}
+        <span className='font-bold text-lg uppercase'>RFQ management dashboard</span>
       </div>
-   
+
       <div className='flex items-center'>
         <button
           className={`ml-4 p-2 rounded flex items-center ${isConnected ? 'text-white' : 'text-gray-500'}`}
@@ -182,7 +179,6 @@ const Header = () => {
             {dropdownOpen && (
               <div className='absolute right-0 mt-2 w-56 bg-white text-black rounded-lg shadow-lg py-2'>
                 <p className='px-4 py-2 border-b border-gray-200 text-sm'>{`${userInfo?.email}`}</p>
-   
                 <p className='px-4 py-2 text-sm'>
                   <a
                     href={`${etherscanUrl}${userInfo?.smartContracts?.[0]?.address}`}
@@ -193,7 +189,18 @@ const Header = () => {
                     Smart Contract
                   </a>
                 </p>
-
+                <div className='px-4 py-2'>
+                  <label className='block text-sm font-medium text-gray-700'>Server</label>
+                  <select
+                    className='mt-1 block w-full p-2 bg-gray-200 text-black rounded'
+                    value={server}
+                    onChange={handleServerChange}
+                  >
+                    <option value='localhost'>Localhost</option>
+                    <option value='test'>Test</option>
+                    <option value='production'>Production</option>
+                  </select>
+                </div>
                 <div className='flex justify-center'>
                   <LogoutButton />
                 </div>

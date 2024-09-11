@@ -19,12 +19,14 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <UserProvider>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <div className='flex h-screen bg-gray-100'>
-              <Sidebar />
-              <div className='flex-1 flex flex-col overflow-hidden'>
-                <Header />
-                <Component {...pageProps} />
-                <ToastContainer style={{ zIndex: 10000 }} limit={1} />
+            <div className='flex flex-col h-screen bg-gray-100'>
+              <Header />
+              <div className='flex flex-1 overflow-hidden'>
+                <Sidebar />
+                <div className='flex-1 flex flex-col overflow-hidden'>
+                  <Component {...pageProps} />
+                  <ToastContainer style={{ zIndex: 10000 }} limit={1} />
+                </div>
               </div>
             </div>
           </QueryClientProvider>
