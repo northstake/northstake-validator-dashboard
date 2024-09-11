@@ -28,8 +28,6 @@ const Header = () => {
 
 
   const depositToContract = () => {
-    alert('Depositing to contract')
-
     writeContract({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
