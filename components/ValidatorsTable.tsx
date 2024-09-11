@@ -117,6 +117,13 @@ const ValidatorsTable = () => {
     }
   }
 
+  const calculateTotalBalance = () => {
+    return validators
+      .filter(v => selectedValidators.has(v.validator_index?.toString() ?? ''))
+      .reduce((total, validator) => total + (Number(validator.balance) / 1000000000), 0)
+      .toFixed(5)
+  }
+
   return (
     <div className='overflow-x-auto'>
       {isLoading ? (
@@ -276,12 +283,16 @@ const ValidatorsTable = () => {
                           {validator.validator_public_key?.substring(0, 10)}...
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                          {Number(validator.balance) / 1000000000} ETH
+                          {(Number(validator.balance) / 1000000000).toFixed(5)} ETH
                         </td>
                       </tr>
                     ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className='text-right mb-4'>
+              <span className='text-lg font-semibold text-gray-800'>Total Balance: {calculateTotalBalance()} ETH</span>
             </div>
 
             <div className='flex justify-end mt-6'>
