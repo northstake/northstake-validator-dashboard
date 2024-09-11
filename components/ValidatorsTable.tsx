@@ -191,7 +191,9 @@ const ValidatorsTable = () => {
                     className={`px-2 py-1 rounded-full text-xs ${
                       (validator.status as string) === 'active'
                         ? 'bg-green-200 text-green-800'
-                        : 'bg-red-200 text-red-800'
+                        : (validator.status as string) === 'activating'
+                          ? 'bg-yellow-200 text-yellow-800'
+                          : 'bg-red-200 text-red-800'
                     }`}
                   >
                     {validator.status as string}
