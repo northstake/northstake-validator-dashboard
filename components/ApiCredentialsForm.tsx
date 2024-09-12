@@ -13,38 +13,29 @@ const ApiCredentialsForm = () => {
   const { setApi } = useApi();
 
   const onSubmit = (data: FormData) => {
+    //set server to test
+    data.server = 'test'
     setApi(data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg'>
       <div>
-        <label className='block text-sm font-medium text-gray-700'>API Key</label>
+        <label className='block text-sm font-medium text-gray-300'>API Key</label>
         <input
           {...register('apiKey')}
           required
-          className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+          className='mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50'
         />
       </div>
       <div>
-        <label className='block text-sm font-medium text-gray-700'>Private Key</label>
+        <label className='block text-sm font-medium text-gray-300'>Private Key</label>
         <textarea
           {...register('privateKey')}
           required
-          className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+          className='mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50'
+          style={{ height: '150px' }}
         />
-      </div>
-      <div>
-        <label className='block text-sm font-medium text-gray-700'>Server</label>
-        <select
-          {...register('server')}
-          required
-          className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
-        >
-          <option value='test'>Test</option>
-          <option value='localhost'>Localhost</option>
-          <option value='production'>Production</option>
-        </select>
       </div>
       <button
         type='submit'

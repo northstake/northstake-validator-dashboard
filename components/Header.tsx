@@ -156,7 +156,7 @@ const Header = () => {
   }
 
   return (
-    <div className='bg-gray-900 text-white p-2 pr-6 pl-3 flex items-center justify-between'>
+    <div className='bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-2 pr-6 pl-3 flex items-center justify-between'>
       <div className='flex items-center'>
         <Image src='/northstake_2.png' alt='Northstake' width={42} height={42} className='h-12 w-12 mr-2' /> {/* Add your logo here */}
         <span className='font-bold text-lg uppercase'>Validator marketplace dashboard</span>

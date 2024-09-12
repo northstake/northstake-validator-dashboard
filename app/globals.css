@@ -127,4 +127,28 @@ td:first-child {
   @apply px-2 py-1 text-xs font-medium text-center text-red-800 bg-red-100 rounded-lg;
 }
 
-/* Add more custom styles as needed */
+.timeline {
+  position: relative;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -10px;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border: 2px solid #007bff;
+  border-radius: 50%;
+}
+
+.timeline-content {
+  padding-left: 40px;
+}

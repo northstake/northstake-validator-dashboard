@@ -17,6 +17,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ApiProvider>
       <UserProvider>
+
+        {}
+
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <div className='flex flex-col h-screen bg-gray-100'>

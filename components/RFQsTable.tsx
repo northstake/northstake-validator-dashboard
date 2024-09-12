@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useApi } from '../context/ApiContext'
-
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
 import React from 'react'
 import { toast } from 'react-toastify'
 import { useWriteContract } from 'wagmi'
 import { useUser } from '@/context/userContext'
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component'
+import 'react-vertical-timeline-component/style.min.css'
+import { FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
+
 
 
 // New component for expanded content
@@ -14,7 +17,9 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
   const steps = Object.entries(rfq.settlement_steps || {})
 
   const sortedSteps = steps.sort((a, b) => {
-    return a[0].localeCompare(b[0])
+    const timestampA = new Date(a[1]?.timestamp).getTime() || 0;
+    const timestampB = new Date(b[1]?.timestamp).getTime() || 0;
+    return timestampA - timestampB;
   })
 
   const { api } = useApi()
@@ -33,8 +38,6 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
     }
 
     try {
-  
-
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: contractABI,
@@ -48,53 +51,78 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
     }
   }
 
-  //function to check whether we have a step that is named Withdrawal recipient settlement
+  // Function to check whether we have a step that is named Withdrawal recipient settlement
   const hasWithdrawalRecipientSettlement = sortedSteps.some(step => step[0] === 'withdrawal_recipient_settlement')
-  return (
+const iconMapping = {
+  'accepted_quote': <FaCheckCircle />,
+  'escrow_payment': <FaDollarSign />,
+  'exit_proposal': <FaFileContract />,
+  'withdrawal_recipient_settlement': <FaHandHoldingUsd />,
+  'escrow_released': <FaUnlockAlt />
+}
+
+
+    return (
     <tr>
       <td colSpan={6}>
         <div className='p-4 bg-gray-50'>
-          {sortedSteps &&
-            sortedSteps.map(([stepName, stepData]) => (
-              <div key={stepName} className='mb-2'>
-                <h5 className='font-semibold'>
-                  {stepName.replace(/_/g, ' ').charAt(0).toUpperCase() + stepName.replace(/_/g, ' ').slice(1)}
-                </h5>
-                <ul>
-                  {stepData &&
-                    typeof stepData === 'object' &&
-                    Object.entries(stepData).map(([key, value]) => (
-                      <li key={key}>
-                        {key}:{' '}
-                        {typeof value === 'string' && value.startsWith('0x') && key !== 'proposal_id' && value.length === 66 ? (
-                          <a
-                            href={getEtherscanLink(value)}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-blue-600 hover:underline'
-                          >
-                            {value}
-                          </a>
-                        ) : typeof value === 'object' ? (
-                          JSON.stringify(value)
-                        ) : value !== null && value !== undefined ? (
-                          String(value)
-                        ) : (
-                          ''
-                        )}
-                        {key === 'proposal_id' && !hasWithdrawalRecipientSettlement && (
-                          <button
-                            onClick={() => handleProposalExit(value as string)}
-                            className='ml-2 text-green-600 hover:text-green-800'
-                          >
-                           Accept exit proposal
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            ))}
+            <VerticalTimeline
+              animate={true}
+              layout={'1-column'}
+              lineColor='rgb(33, 150, 243)'
+              
+            >
+            {sortedSteps &&
+              sortedSteps.map(([stepName, stepData]) => (
+                <VerticalTimelineElement
+                  key={stepName}
+                  date={new Date(stepData.timestamp).toLocaleString()}
+                  iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}      
+                  //make sure nothing overflows in the content card
+                   contentArrowStyle={{ borderRight: '7px solid  rgb(33, 150, 243)' }}
+                  contentStyle={{ overflow: 'auto' }}
+                  icon={iconMapping[stepName as keyof typeof iconMapping]}
+                  style={{margin:'1em'}}
+                >
+                  <h5 className='font-semibold'>
+                    {stepName.replace(/_/g, ' ').charAt(0).toUpperCase() + stepName.replace(/_/g, ' ').slice(1)}
+                  </h5>
+                  <ul>
+                    {stepData &&
+                      typeof stepData === 'object' &&
+                      Object.entries(stepData).filter(([key]) => !key.includes('timestamp')).map(([key, value]) => (
+                        <li key={key} className='break-words'>
+                          {key}:{' '}
+                          {typeof value === 'string' && value.startsWith('0x') && key !== 'proposal_id' && value.length === 66 ? (
+                            <a
+                              href={getEtherscanLink(value)}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='text-blue-600 hover:underline break-all'
+                            >
+                              {value}
+                            </a>
+                          ) : typeof value === 'object' ? (
+                            JSON.stringify(value)
+                          ) : value !== null && value !== undefined ? (
+                            String(value)
+                          ) : (
+                            ''
+                          )}
+                          {key === 'proposal_id' && !hasWithdrawalRecipientSettlement && (
+                            <button
+                              onClick={() => handleProposalExit(value as string)}
+                              className='ml-2 text-green-600 hover:text-green-800'
+                            >
+                              Accept exit proposal
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
+                </VerticalTimelineElement>
+              ))}
+          </VerticalTimeline>
         </div>
       </td>
     </tr>
@@ -436,4 +464,3 @@ const RFQsTable = () => {
 }
 
 export default RFQsTable
-           
