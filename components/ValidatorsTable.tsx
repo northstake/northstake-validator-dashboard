@@ -84,10 +84,10 @@ const ValidatorsTable = () => {
         })
 
         const result = await response.json()
-        if (result.result.message != 'Validators are already being sold') {
-          toast.success(result.result.message)
+        if (!result.result.message) {
+          toast.success('Generated new RFQ: ' + result.result.id)
         } else {
-          toast.error('One or more selected validators are already part of an active RFQ')
+          toast.error('Response from server: ' + result.result.message)
         }
         setIsModalOpen(false)
       } catch (error) {
