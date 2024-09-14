@@ -9,8 +9,6 @@ import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeli
 import 'react-vertical-timeline-component/style.min.css'
 import { FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
 
-
-
 // New component for expanded content
 const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
   // Make an array of all settlement steps
@@ -137,9 +135,11 @@ const RFQsTable = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(['active', 'finished', 'rejected', 'expired', 'failed'])
   )
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const fetchRFQs = async () => {
     if (api) {
+      setIsRefreshing(true)
       const response = await fetch('/api/listRFQDocuments', {
         method: 'POST',
         headers: {
@@ -168,11 +168,14 @@ const RFQsTable = () => {
       } else {
         console.error(result.error)
       }
+      setIsRefreshing(false)
     }
   }
 
   useEffect(() => {
     fetchRFQs()
+    const interval = setInterval(fetchRFQs, 10000) // Refresh every 10 seconds
+    return () => clearInterval(interval)
   }, [api])
 
   const toggleRowExpansion = (id: string) => {
@@ -309,6 +312,11 @@ const RFQsTable = () => {
           </label>
         ))}
       </div>
+      {isRefreshing && (
+        <div className='flex justify-center mb-4'>
+          <div className='loader'></div> {/* Add your loading spinner here */}
+        </div>
+      )}
       {filteredRFQs.length === 0 ? (
         <div className='flex flex-col items-center justify-center h-64'>
           <svg
