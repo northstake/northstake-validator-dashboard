@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useApi } from '../context/ApiContext'
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
 import React from 'react'
@@ -8,6 +8,7 @@ import { useUser } from '@/context/userContext'
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component'
 import 'react-vertical-timeline-component/style.min.css'
 import { FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
+import useFetchRFQs from '../hooks/useFetchRFQs'
 
 // New component for expanded content
 const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
@@ -128,55 +129,13 @@ const iconMapping = {
 }
 
 const RFQsTable = () => {
-  const [rfqs, setRFQs] = useState<RFQDocumentSeller[]>([])
-  const { api } = useApi()
+  const { rfqs, fetchRFQs } = useFetchRFQs()
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [loadingQuoteId, setLoadingQuoteId] = useState<string | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(['active', 'finished', 'rejected', 'expired', 'failed'])
   )
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const fetchRFQs = async () => {
-    if (api) {
-      setIsRefreshing(true)
-      const response = await fetch('/api/listRFQDocuments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          apiKey: api.apiKey,
-          privateKey: api.privateKey,
-          server: api.server
-        })
-      })
-
-      const result = await response.json()
-      if (result.success && Array.isArray(result.documents)) {
-        // Order RFQs by active status first
-        const orderedRFQs = result.documents.sort((a: RFQDocumentSeller, b: RFQDocumentSeller) => {
-          if (a.status.toLowerCase() === 'active' && b.status.toLowerCase() !== 'active') {
-            return -1
-          }
-          if (a.status.toLowerCase() !== 'active' && b.status.toLowerCase() === 'active') {
-            return 1
-          }
-          return 0
-        })
-        setRFQs(orderedRFQs)
-      } else {
-        console.error(result.error)
-      }
-      setIsRefreshing(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchRFQs()
-    const interval = setInterval(fetchRFQs, 10000) // Refresh every 10 seconds
-    return () => clearInterval(interval)
-  }, [api])
+  const { api } = useApi()
 
   const toggleRowExpansion = (id: string) => {
     setExpandedRows(prev => {
@@ -312,11 +271,6 @@ const RFQsTable = () => {
           </label>
         ))}
       </div>
-      {isRefreshing && (
-        <div className='flex justify-center mb-4'>
-          <div className='loader'></div> {/* Add your loading spinner here */}
-        </div>
-      )}
       {filteredRFQs.length === 0 ? (
         <div className='flex flex-col items-center justify-center h-64'>
           <svg

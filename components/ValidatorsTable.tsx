@@ -4,6 +4,7 @@ import { ValidatorInfo, CreateRFQRequest, Wallet } from '@northstake/northstakea
 import { toast } from 'react-toastify'
 import Modal from './Modal'
 import { FaWallet, FaTimes, FaCopy } from 'react-icons/fa'
+import useFetchRFQs from '@/hooks/useFetchRFQs'
 
 const ValidatorsTable = () => {
   const [validators, setValidators] = useState<ValidatorInfo[]>([])
@@ -17,6 +18,7 @@ const ValidatorsTable = () => {
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: string } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['active', 'activating', 'exited']))
   const { api } = useApi()
+  const { rfqs, fetchRFQs } = useFetchRFQs();
 
   useEffect(() => {
     const fetchValidators = async () => {
@@ -37,7 +39,16 @@ const ValidatorsTable = () => {
         const result = await response.json()
         if (result.success) {
           if (Array.isArray(result.validators)) {
-            setValidators(result.validators)
+            setValidators(prevValidators => {
+              const updatedValidators = prevValidators.map(prevValidator => {
+                const newValidator = result.validators.find((v: { validator_index: number | undefined }) => v.validator_index === prevValidator.validator_index);
+                return newValidator ? newValidator : prevValidator;
+              });
+              const newValidators = result.validators.filter((newValidator: { validator_index: number | undefined }) => 
+                !prevValidators.some(prevValidator => prevValidator.validator_index === newValidator.validator_index)
+              );
+              return [...updatedValidators, ...newValidators];
+            })
           } else {
             toast.error('Failed to fetch validators')
           }
@@ -48,6 +59,11 @@ const ValidatorsTable = () => {
       }
     }
     fetchValidators()
+    fetchRFQs()
+    const interval = setInterval(fetchValidators, 10000)
+    return () => {
+      clearInterval(interval)
+    }
   }, [api])
 
   const handleCheckboxChange = (validatorIndex: string) => {
@@ -192,13 +208,13 @@ const ValidatorsTable = () => {
           </label>
         ))}
       </div>
-      {isLoading ? (
+      {isLoading && validators.length === 0 ? (
         <div className='flex justify-center items-center h-64'>
           <div className='loader'></div>
         </div>
       ) : (
         <div>
-          <table className='min-w-full  bg-white shadow-md rounded-lg overflow-hidden'>
+          <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
             <thead className='bg-gray-900 h-12'>
               <tr>
                 <th className='px-4 py-2 text-left text-gray-100 w-12'>Select</th>
@@ -207,6 +223,7 @@ const ValidatorsTable = () => {
                 <th className='px-4 py-2 text-left text-gray-100 cursor-pointer w-12' onClick={() => requestSort('status')}>Status</th>
                 <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('balance')}>Balance</th>
                 <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('exit_estimate.estimated_exit_time')}>Estimated exit time</th>
+               
               </tr>
             </thead>
             <tbody>
@@ -217,7 +234,7 @@ const ValidatorsTable = () => {
                       type='checkbox'
                       checked={selectedValidators.has(validator.validator_index?.toString() ?? '')}
                       onChange={() => handleCheckboxChange(validator.validator_index?.toString() ?? '')}
-                      disabled={validator.status !== ('active' as string)}
+                      disabled={validator.status !== ('active' as string) || rfqs.some(rfq => rfq.validators.some(v => v.validator_index?.toString() === validator.validator_index?.toString()))}
                     />
                   </td>
                   <td className='px-2 py-2'>
