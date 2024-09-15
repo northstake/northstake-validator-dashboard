@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { useUser } from '@/context/userContext'
-import { FaUserCircle, FaEthereum, FaCoins } from 'react-icons/fa'
+import { FaUserCircle, FaEthereum, FaCoins, FaBell, FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
 import LogoutButton from './Logoutbutton'
 import { ethers } from 'ethers'
 import { toast } from 'react-toastify'
@@ -10,6 +10,8 @@ import { useConnect, useAccount, useDisconnect, useWriteContract, useWaitForTran
 import { readContract } from '@wagmi/core'
 import { config } from '@/config/wagmi'
 import Image from 'next/image'
+import { useRFQ } from '@/context/RFQContext'
+import Link from 'next/link'
 
 const Header = () => {
   const { userInfo, contractAddress, contractABI } = useUser()
@@ -18,6 +20,7 @@ const Header = () => {
   const { disconnect } = useDisconnect()
   const { data: hash, isPending, writeContract, isError } = useWriteContract()
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash })
+  const { rfqs } = useRFQ()
 
   const [server, setServer] = useState('test')
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -26,7 +29,24 @@ const Header = () => {
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [availableRewards, setAvailableRewards] = useState<string>('0')
 
+  const iconMapping = {
+    'accepted_quote': <FaCheckCircle className='text-green-500' />,
+    'new_quote': <FaCheckCircle className='text-green-500' />,
+    'escrow_payment': <FaDollarSign className='text-yellow-500' />,
+    'exit_proposal': <FaFileContract className='text-blue-500' />,
+    'withdrawal_recipient_settlement': <FaHandHoldingUsd className='text-green-500' />,
+    'escrow_released': <FaUnlockAlt className='text-red-500' />
+  }
 
+  const actionableRFQs = rfqs.filter(rfq => {
+    const hasAcceptableQuote = rfq.status.toLowerCase() === 'active' && !rfq.best_quote && !rfq.settlement_steps?.accepted_quote
+    const hasExitProposal = rfq.settlement_steps?.exit_proposal && !rfq.settlement_steps?.withdrawal_recipient_settlement
+    return hasAcceptableQuote || hasExitProposal
+  })
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen)
+  }
 
   const depositToContract = () => {
     writeContract({
@@ -35,13 +55,10 @@ const Header = () => {
       functionName: 'deposit',
       args: [],
       value: ethers.parseEther('32')
-      
     })
   }
 
   const acceptExitFromContract = (proposalId: string) => {
-    //we need to turn the proposalId into a bytes32
- 
     writeContract({
       address: contractAddress as `0x${string}`,
       abi: contractABI,
@@ -163,6 +180,28 @@ const Header = () => {
       </div>
 
       <div className='flex items-center'>
+        {actionableRFQs.length > 0 && (
+          <div className='relative'>
+            <FaBell className='text-2xl text-yellow-400 cursor-pointer' onClick={toggleDropdown} />
+            <span className='absolute top-0 right-0 inline-block w-3 h-3 bg-red-600 rounded-full'></span>
+            {dropdownOpen && (
+              <div className='absolute right-0 mt-2 w-72 bg-white text-black rounded-lg shadow-lg py-2 z-50'>
+                {actionableRFQs.map(rfq => (
+                  <Link key={rfq.id} href={`/rfq?expand=${rfq.id}`} passHref legacyBehavior>
+                    <a className='block px-4 py-2 hover:bg-gray-200 flex items-center'>
+                      {iconMapping[rfq.status === 'active' && !rfq.settlement_steps?.accepted_quote ? 'new_quote' : 'exit_proposal']}
+                      <span className='ml-2 font-semibold'>
+                        {rfq.status === 'active' && !rfq.settlement_steps?.accepted_quote
+                          ? `New quote available`
+                          : `New exit proposal available`}
+                      </span>
+                    </a>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <button
           className={`ml-4 p-2 rounded flex items-center ${isConnected ? 'text-white' : 'text-gray-500'}`}
           onClick={() => {

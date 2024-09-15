@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApi } from '../context/ApiContext'
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
 import React from 'react'
@@ -8,7 +8,8 @@ import { useUser } from '@/context/userContext'
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component'
 import 'react-vertical-timeline-component/style.min.css'
 import { FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
-import useFetchRFQs from '../hooks/useFetchRFQs'
+import { useRFQ } from '../context/RFQContext' // Import the useRFQ hook
+import { useRouter } from 'next/router'
 
 // New component for expanded content
 const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
@@ -129,13 +130,21 @@ const iconMapping = {
 }
 
 const RFQsTable = () => {
-  const { rfqs, fetchRFQs } = useFetchRFQs()
+  const { rfqs, fetchRFQs } = useRFQ() // Use the useRFQ hook
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [loadingQuoteId, setLoadingQuoteId] = useState<string | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(['active', 'finished', 'rejected', 'expired', 'failed'])
   )
   const { api } = useApi()
+  const router = useRouter() // Use the useRouter hook
+
+  useEffect(() => {
+    const { expand } = router.query
+    if (expand) {
+      setExpandedRows(new Set([expand as string]))
+    }
+  }, [router.query])
 
   const toggleRowExpansion = (id: string) => {
     setExpandedRows(prev => {

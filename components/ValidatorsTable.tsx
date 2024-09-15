@@ -4,7 +4,7 @@ import { ValidatorInfo, CreateRFQRequest, Wallet } from '@northstake/northstakea
 import { toast } from 'react-toastify'
 import Modal from './Modal'
 import { FaWallet, FaTimes, FaCopy } from 'react-icons/fa'
-import useFetchRFQs from '@/hooks/useFetchRFQs'
+import { useRFQ } from '@/context/RFQContext' // Import the useRFQ hook
 import useFetchValidators from '@/hooks/useFetchValidators'
 
 const ValidatorsTable = () => {
@@ -17,7 +17,7 @@ const ValidatorsTable = () => {
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: string } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['active', 'activating', 'exited']))
   const { api } = useApi()
-  const { rfqs, fetchRFQs } = useFetchRFQs();
+  const { rfqs, fetchRFQs } = useRFQ() // Use the useRFQ hook
   const { validators, fetchValidators, isRefreshing } = useFetchValidators()
 
   useEffect(() => {
