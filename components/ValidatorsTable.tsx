@@ -5,65 +5,24 @@ import { toast } from 'react-toastify'
 import Modal from './Modal'
 import { FaWallet, FaTimes, FaCopy } from 'react-icons/fa'
 import useFetchRFQs from '@/hooks/useFetchRFQs'
+import useFetchValidators from '@/hooks/useFetchValidators'
 
 const ValidatorsTable = () => {
-  const [validators, setValidators] = useState<ValidatorInfo[]>([])
   const [selectedValidators, setSelectedValidators] = useState<Set<string>>(new Set())
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [validatorsPerPage, setValidatorsPerPage] = useState(50)
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: string } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['active', 'activating', 'exited']))
   const { api } = useApi()
   const { rfqs, fetchRFQs } = useFetchRFQs();
+  const { validators, fetchValidators, isRefreshing } = useFetchValidators()
 
   useEffect(() => {
-    const fetchValidators = async () => {
-      if (api) {
-        setIsLoading(true)
-        const response = await fetch('/api/listValidators', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            apiKey: api.apiKey,
-            privateKey: api.privateKey,
-            server: api.server
-          })
-        })
-
-        const result = await response.json()
-        if (result.success) {
-          if (Array.isArray(result.validators)) {
-            setValidators(prevValidators => {
-              const updatedValidators = prevValidators.map(prevValidator => {
-                const newValidator = result.validators.find((v: { validator_index: number | undefined }) => v.validator_index === prevValidator.validator_index);
-                return newValidator ? newValidator : prevValidator;
-              });
-              const newValidators = result.validators.filter((newValidator: { validator_index: number | undefined }) => 
-                !prevValidators.some(prevValidator => prevValidator.validator_index === newValidator.validator_index)
-              );
-              return [...updatedValidators, ...newValidators];
-            })
-          } else {
-            toast.error('Failed to fetch validators')
-          }
-        } else {
-          console.error(result.error)
-        }
-        setIsLoading(false)
-      }
-    }
     fetchValidators()
     fetchRFQs()
-    const interval = setInterval(fetchValidators, 10000)
-    return () => {
-      clearInterval(interval)
-    }
   }, [api])
 
   const handleCheckboxChange = (validatorIndex: string) => {
@@ -208,7 +167,7 @@ const ValidatorsTable = () => {
           </label>
         ))}
       </div>
-      {isLoading && validators.length === 0 ? (
+      {isRefreshing && validators.length === 0 ? (
         <div className='flex justify-center items-center h-64'>
           <div className='loader'></div>
         </div>
