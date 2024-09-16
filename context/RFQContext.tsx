@@ -8,6 +8,9 @@ interface RFQContextType {
   fetchRFQs: () => Promise<void>
 }
 
+/*
+We need to keep our RFQ documents in context so that we can access them throughout the app, for notifications for example.
+*/
 const RFQContext = createContext<RFQContextType | undefined>(undefined)
 
 export const RFQProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -58,11 +61,7 @@ export const RFQProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(interval)
   }, [api])
 
-  return (
-    <RFQContext.Provider value={{ rfqs, isRefreshing, fetchRFQs }}>
-      {children}
-    </RFQContext.Provider>
-  )
+  return <RFQContext.Provider value={{ rfqs, isRefreshing, fetchRFQs }}>{children}</RFQContext.Provider>
 }
 
 export const useRFQ = () => {

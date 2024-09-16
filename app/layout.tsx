@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "RFQ dashboard",
-  description: "Northstake RFQ dashboard",
+  title: "Validator marketplace dashboard",
+  description: "Northstake ethereum validator marketplace dashboard",
 };
 
 export default function RootLayout({
