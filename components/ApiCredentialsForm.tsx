@@ -1,61 +1,76 @@
 'use client'
-import { useForm } from 'react-hook-form';
-import { useApi } from '../context/ApiContext';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-interface FormData {
-  apiKey: string;
-  privateKey: string;
-  server: string;
-  keepSignedIn: boolean;
-}
-
-const ApiCredentialsForm = () => {
-  const { register, handleSubmit } = useForm<FormData>();
-  const { setApi } = useApi();
+const ApiCredentialsForm = ({ onSubmit }: { onSubmit: (apiCredentials: { apiKey: string; privateKey: string; server: string }, keepSignedIn: boolean) => void }) => {
+  const [apiKey, setApiKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
+  const [server, setServer] = useState('test');
   const [keepSignedIn, setKeepSignedIn] = useState(false);
 
-  const onSubmit = (data: FormData) => {
-    data.server = 'test';
-    //replace any \n  strings with actual newlines
-    data.privateKey = data.privateKey.replace(/\\n/g, '\n');
-    setApi(data, keepSignedIn); // Pass keepSignedIn flag to setApi
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({ apiKey, privateKey, server }, keepSignedIn);
+  };
+
+  const handlePrivateKeyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    //we need to replace /n with actual newlines
+    const formattedValue = value.replace(/\\n/g, '\n');
+    setPrivateKey(formattedValue);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg'>
-      <div>
-        <label className='block text-sm font-medium text-gray-300'>API Key</label>
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-300">API Key</label>
         <input
-          {...register('apiKey')}
+          type="text"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="mt-1 block w-full p-2 bg-gray-700 text-white rounded"
           required
-          className='mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50'
         />
       </div>
-      <div>
-        <label className='block text-sm font-medium text-gray-300'>Private Key</label>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-300">Private Key</label>
         <textarea
-          {...register('privateKey')}
+          value={privateKey}
+          onChange={handlePrivateKeyChange}
+          className="mt-1 block w-full p-2 bg-gray-700 text-white rounded"
           required
-          className='mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50'
-          style={{ height: '150px' }}
+          style={{ height: '250px', fontSize: '8px' }}
         />
       </div>
-      <div className='flex items-center'>
-        <input
-          type='checkbox'
-          {...register('keepSignedIn')}
-          className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
-          onChange={(e) => setKeepSignedIn(e.target.checked)}
-        />
-        <label className='ml-2 block text-sm text-gray-300'>Keep me signed in</label>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-300">Server</label>
+        <select
+          value={server}
+          onChange={(e) => setServer(e.target.value)}
+          className="mt-1 block w-full p-2 bg-gray-700 text-white rounded"
+        >
+          <option value="test">Test</option>
+          <option value="production">Production</option>
+        </select>
       </div>
-      <button
-        type='submit'
-        className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-      >
-        Login
-      </button>
+      <div className="mb-4">
+        <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            checked={keepSignedIn}
+            onChange={(e) => setKeepSignedIn(e.target.checked)}
+            className="form-checkbox"
+          />
+          <span className="ml-2 text-sm text-gray-300">Keep me signed in</span>
+        </label>
+      </div>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300"
+        >
+          Submit
+        </button>
+      </div>
     </form>
   );
 };

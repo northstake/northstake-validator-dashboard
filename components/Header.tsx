@@ -23,8 +23,10 @@ const Header = () => {
   const { rfqs } = useRFQ()
 
   const [server, setServer] = useState('test')
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const notificationDropdownRef = useRef<HTMLDivElement>(null)
+  const userDropdownRef = useRef<HTMLDivElement>(null)
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [availableRewards, setAvailableRewards] = useState<string>('0')
@@ -44,8 +46,14 @@ const Header = () => {
     return hasAcceptableQuote || hasExitProposal
   })
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen)
+  const toggleNotificationDropdown = () => {
+    setNotificationDropdownOpen(!notificationDropdownOpen)
+    setUserDropdownOpen(false)
+  }
+
+  const toggleUserDropdown = () => {
+    setUserDropdownOpen(!userDropdownOpen)
+    setNotificationDropdownOpen(false)
   }
 
   const depositToContract = () => {
@@ -172,6 +180,26 @@ const Header = () => {
     }
   }
 
+  const handleClickOutside = (event: MouseEvent) => {
+    if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target as Node)) {
+      setNotificationDropdownOpen(false)
+    }
+    if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+      setUserDropdownOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    if (notificationDropdownOpen || userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [notificationDropdownOpen, userDropdownOpen])
+
   return (
     <div className='bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-2 pr-6 pl-3 flex items-center justify-between'>
       <div className='flex items-center'>
@@ -181,10 +209,10 @@ const Header = () => {
 
       <div className='flex items-center'>
         {actionableRFQs.length > 0 && (
-          <div className='relative'>
-            <FaBell className='text-2xl text-yellow-400 cursor-pointer' onClick={toggleDropdown} />
+          <div className='relative' ref={notificationDropdownRef}>
+            <FaBell className='text-2xl text-yellow-400 cursor-pointer' onClick={toggleNotificationDropdown} />
             <span className='absolute top-0 right-0 inline-block w-3 h-3 bg-red-600 rounded-full'></span>
-            {dropdownOpen && (
+            {notificationDropdownOpen && (
               <div className='absolute right-0 mt-2 w-72 bg-white text-black rounded-lg shadow-lg py-2 z-50'>
                 {actionableRFQs.map(rfq => (
                   <Link key={rfq.id} href={`/rfq?expand=${rfq.id}`} passHref legacyBehavior>
@@ -211,11 +239,11 @@ const Header = () => {
           <FaEthereum className='text-2xl' />
         </button>
         {userInfo && (
-          <div className='relative ml-4' ref={dropdownRef}>
-            <button className='flex items-center focus:outline-none' onClick={() => setDropdownOpen(!dropdownOpen)}>
+          <div className='relative ml-4' ref={userDropdownRef}>
+            <button className='flex items-center focus:outline-none' onClick={toggleUserDropdown}>
               <FaUserCircle className='text-2xl' />
             </button>
-            {dropdownOpen && (
+            {userDropdownOpen && (
               <div className='absolute right-0 mt-2 w-56 bg-white text-black rounded-lg shadow-lg py-2'>
                 <p className='px-4 py-2 border-b border-gray-200 text-sm'>{`${userInfo?.email}`}</p>
                 <p className='px-4 py-2 text-sm'>
