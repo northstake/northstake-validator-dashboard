@@ -1,12 +1,13 @@
 'use client'
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import Cookies from 'js-cookie'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
 interface ApiContextProps {
   api: { apiKey: string; privateKey: string; server: string } | null
-  setApi: (api: { apiKey: string; privateKey: string; server: string }) => void
+  setApi: (api: { apiKey: string; privateKey: string; server: string }, keepSignedIn: boolean) => void
   logout: () => void
 }
 
@@ -21,10 +22,27 @@ const filledCredentials =
     : null
 
 export const ApiProvider = ({ children }: { children: ReactNode }) => {
-  const [api, setApi] = useState<ApiContextProps['api']>(filledCredentials)
+  const [api, setApiState] = useState<ApiContextProps['api']>(filledCredentials)
+
+  useEffect(() => {
+    const savedApi = Cookies.get('api')
+    if (savedApi) {
+      setApiState(JSON.parse(savedApi))
+    }
+  }, [])
+
+  const setApi = (api: { apiKey: string; privateKey: string; server: string }, keepSignedIn: boolean) => {
+    setApiState(api)
+    if (keepSignedIn) {
+      Cookies.set('api', JSON.stringify(api), { expires: 7 }) // Set cookie to expire in 7 days
+    } else {
+      Cookies.remove('api') // Ensure the cookie is removed if not keeping signed in
+    }
+  }
 
   const logout = () => {
-    setApi(null)
+    setApiState(null)
+    Cookies.remove('api')
   }
 
   return (

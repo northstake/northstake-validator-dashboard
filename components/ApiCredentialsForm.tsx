@@ -1,21 +1,25 @@
 'use client'
 import { useForm } from 'react-hook-form';
 import { useApi } from '../context/ApiContext';
+import { useState } from 'react';
 
 interface FormData {
   apiKey: string;
   privateKey: string;
   server: string;
+  keepSignedIn: boolean;
 }
 
 const ApiCredentialsForm = () => {
   const { register, handleSubmit } = useForm<FormData>();
   const { setApi } = useApi();
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
 
   const onSubmit = (data: FormData) => {
-    //set server to test
-    data.server = 'test'
-    setApi(data);
+    data.server = 'test';
+    //replace any \n  strings with actual newlines
+    data.privateKey = data.privateKey.replace(/\\n/g, '\n');
+    setApi(data, keepSignedIn); // Pass keepSignedIn flag to setApi
   };
 
   return (
@@ -37,6 +41,15 @@ const ApiCredentialsForm = () => {
           style={{ height: '150px' }}
         />
       </div>
+      <div className='flex items-center'>
+        <input
+          type='checkbox'
+          {...register('keepSignedIn')}
+          className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
+          onChange={(e) => setKeepSignedIn(e.target.checked)}
+        />
+        <label className='ml-2 block text-sm text-gray-300'>Keep me signed in</label>
+      </div>
       <button
         type='submit'
         className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
@@ -44,7 +57,7 @@ const ApiCredentialsForm = () => {
         Login
       </button>
     </form>
-  )
+  );
 };
 
 export default ApiCredentialsForm;
