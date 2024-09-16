@@ -6,7 +6,6 @@ A demo web application showing how to use the Northstake API/SDK ecosystem to ma
 
 - [Introduction](#introduction)
 - [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
 - [Environment Variables](#environment-variables)
 - [Scripts](#scripts)
 - [Usage](#usage)
@@ -23,7 +22,7 @@ This project is a demo example and should not be deployed as a production tool w
 First, clone the repository:
 
 ```bash
-git clone https://github.com/your-username/rfq-client.git
+git clone https://github.com/northstake/northstake-validator-dashboard
 cd rfq-client
 ```
 
