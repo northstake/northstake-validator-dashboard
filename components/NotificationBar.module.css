@@ -1,0 +1,27 @@
+.notificationBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, rgb(143, 171, 204) 0%, rgb(34, 57, 63) 100%);
+    color: white;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.5s ease-in-out;
+  }
+  
+  .rightAlign {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  
+  .slideIn {
+    transform: translateY(0);
+  }
+  
+  .slideOut {
+    transform: translateY(100%);
+  }
