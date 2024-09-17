@@ -69,14 +69,33 @@ body {
 
 
 .loader {
-  border: 4px solid #f3f3f3;
-  /* Light grey */
-  border-top: 4px solid #3498db;
-  /* Blue */
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 2s linear infinite;
+  height: 4px;
+  width: 100%;
+  background: #f3f3f3;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.loader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 25%;
+  background: #3498db;
+  animation: load 2s linear infinite;
+}
+
+@keyframes load {
+  0% {
+    left: -25%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 @keyframes spin {

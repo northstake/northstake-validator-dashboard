@@ -14,7 +14,7 @@ const ValidatorsTable = () => {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [validatorsPerPage, setValidatorsPerPage] = useState(50)
-  const [sortConfig, setSortConfig] = useState<{ key: string, direction: string } | null>(null)
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['active', 'activating', 'exited']))
   const { api } = useApi()
   const { rfqs, fetchRFQs } = useRFQ() // Use the useRFQ hook
@@ -114,29 +114,31 @@ const ValidatorsTable = () => {
     })
   }
 
-  const filteredValidators = validators.filter(validator => selectedStatuses.has((validator.status as string)?.toLowerCase() ?? ''))
+  const filteredValidators = validators.filter(validator =>
+    selectedStatuses.has((validator.status as string)?.toLowerCase() ?? '')
+  )
 
   const sortedValidators = filteredValidators.sort((a, b) => {
     // Prioritize "active" validators
-    if ((a.status as string) === 'active' && (b.status as string) !== 'active') return -1;
-    if ((a.status as string) !== 'active' && (b.status as string) === 'active') return 1;
-  
+    if ((a.status as string) === 'active' && (b.status as string) !== 'active') return -1
+    if ((a.status as string) !== 'active' && (b.status as string) === 'active') return 1
+
     // Apply other sorting criteria if both are "active" or neither is "active"
     if (sortConfig !== null) {
-      const { key, direction } = sortConfig;
-      const aValue = a[key as keyof ValidatorInfo];
-      const bValue = b[key as keyof ValidatorInfo];
+      const { key, direction } = sortConfig
+      const aValue = a[key as keyof ValidatorInfo]
+      const bValue = b[key as keyof ValidatorInfo]
       if (aValue !== undefined && bValue !== undefined) {
         if (aValue < bValue) {
-          return direction === 'ascending' ? -1 : 1;
+          return direction === 'ascending' ? -1 : 1
         }
         if (aValue > bValue) {
-          return direction === 'ascending' ? 1 : -1;
+          return direction === 'ascending' ? 1 : -1
         }
       }
     }
-    return 0;
-  });
+    return 0
+  })
 
   const indexOfLastValidator = currentPage * validatorsPerPage
   const indexOfFirstValidator = indexOfLastValidator - validatorsPerPage
@@ -167,95 +169,121 @@ const ValidatorsTable = () => {
           </label>
         ))}
       </div>
-      {isRefreshing && validators.length === 0 ? (
-        <div className='flex justify-center items-center h-64'>
-          <div className='loader'></div>
-        </div>
-      ) : (
-        <div>
-          <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-            <thead className='bg-gray-900 h-12'>
-              <tr>
-                <th className='px-4 py-2 text-left text-gray-100 w-12'>Select</th>
-                <th className='px-2 py-2 text-left text-gray-100 w-24 cursor-pointer' onClick={() => requestSort('validator_index')}>Validator index</th>
-                <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('validator_public_key')}>Public Key</th>
-                <th className='px-4 py-2 text-left text-gray-100 cursor-pointer w-12' onClick={() => requestSort('status')}>Status</th>
-                <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('balance')}>Balance</th>
-                <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('exit_estimate.estimated_exit_time')}>Estimated exit time</th>
-               
-              </tr>
-            </thead>
-            <tbody>
-              {currentValidators.map(validator => (
-                <tr key={validator.validator_public_key} className='border-b border-gray-200 hover:bg-gray-100'>
-                  <td className='px-4 py-2'>
-                    <input
-                      type='checkbox'
-                      checked={selectedValidators.has(validator.validator_index?.toString() ?? '')}
-                      onChange={() => handleCheckboxChange(validator.validator_index?.toString() ?? '')}
-                      disabled={validator.status !== ('active' as string) || rfqs.some(rfq => rfq.validators.some(v => v.validator_index?.toString() === validator.validator_index?.toString()))}
-                    />
-                  </td>
-                  <td className='px-2 py-2'>
-                    {validator.validator_index ? (
-                      <a
-                        href={`https://${api?.server === 'test' ? 'holesky.' : ''}beaconcha.in/validator/${validator.validator_index}`}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-blue-600 hover:underline'
-                      >
-                        {validator.validator_index}
-                      </a>
-                    ) : (
-                      'N/A'
-                    )}
-                  </td>
-                  <td className='px-4 py-2 flex items-center space-x-2'>
-                    <input
-                      type='text'
-                      value={validator.validator_public_key ?? ''}
-                      readOnly
-                      className='w-full px-2 py-1 border rounded text-gray-700 bg-gray-100'
-                    />
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(validator.validator_public_key ?? '')
-                        toast.success('Copied to clipboard')
-                      }}
-                      className='text-gray-500 hover:text-gray-200 transition duration-150 ml-2'
-                    >
-                      <FaCopy />
-                    </button>
-                  </td>
-                  <td className='px-4 py-2'>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        (validator.status as string) === 'active'
-                          ? 'bg-green-200 text-green-800'
-                          : (validator.status as string) === 'activating'
-                          ? 'bg-yellow-200 text-yellow-800'
-                          : 'bg-red-200 text-red-800'
+      <div>
+        <div className='flex justify-center items-center h-4'>{isRefreshing && <div className='loader'></div>}</div>
+        <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
+          <thead className='bg-gray-900 h-12'>
+            <tr>
+              <th className='px-4 py-2 text-left text-gray-100 w-12'>Select</th>
+              <th
+                className='px-2 py-2 text-left text-gray-100 w-24 cursor-pointer'
+                onClick={() => requestSort('validator_index')}
+              >
+                Validator index
+              </th>
+              <th
+                className='px-4 py-2 text-left text-gray-100 cursor-pointer'
+                onClick={() => requestSort('validator_public_key')}
+              >
+                Public Key
+              </th>
+              <th
+                className='px-4 py-2 text-left text-gray-100 cursor-pointer w-12'
+                onClick={() => requestSort('status')}
+              >
+                Status
+              </th>
+              <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('balance')}>
+                Balance
+              </th>
+              <th
+                className='px-4 py-2 text-left text-gray-100 cursor-pointer'
+                onClick={() => requestSort('exit_estimate.estimated_exit_time')}
+              >
+                Estimated exit time
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {currentValidators.map(validator => (
+              <tr key={validator.validator_public_key} className='border-b border-gray-200 hover:bg-gray-100'>
+                <td className='px-4 py-2'>
+                  <input
+                    type='checkbox'
+                    checked={selectedValidators.has(validator.validator_index?.toString() ?? '')}
+                    onChange={() => handleCheckboxChange(validator.validator_index?.toString() ?? '')}
+                    disabled={
+                      validator.status !== ('active' as string) ||
+                      rfqs.some(rfq =>
+                        rfq.validators.some(
+                          v => v.validator_index?.toString() === validator.validator_index?.toString()
+                        )
+                      )
+                    }
+                  />
+                </td>
+                <td className='px-2 py-2'>
+                  {validator.validator_index ? (
+                    <a
+                      href={`https://${api?.server === 'test' ? 'holesky.' : ''}beaconcha.in/validator/${
+                        validator.validator_index
                       }`}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-blue-600 hover:underline'
                     >
-                      {validator.status as string}
-                    </span>
-                  </td>
-                  <td className='px-4 py-2'>
-                    {isNaN(Number(validator.balance))
-                      ? 'N/A'
-                      : `${(Number(validator.balance) / 1000000000).toFixed(5)} ETH`}
-                  </td>
-                  <td className='px-4 py-2'>
-                    {validator.exit_estimate?.estimated_exit_time
-                      ? new Date(validator.exit_estimate.estimated_exit_time).toLocaleString()
-                      : 'N/A'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      {validator.validator_index}
+                    </a>
+                  ) : (
+                    'N/A'
+                  )}
+                </td>
+                <td className='px-4 py-2 flex items-center space-x-2'>
+                  <input
+                    type='text'
+                    value={validator.validator_public_key ?? ''}
+                    readOnly
+                    className='w-full px-2 py-1 border rounded text-gray-700 bg-gray-100'
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(validator.validator_public_key ?? '')
+                      toast.success('Copied to clipboard')
+                    }}
+                    className='text-gray-500 hover:text-gray-200 transition duration-150 ml-2'
+                  >
+                    <FaCopy />
+                  </button>
+                </td>
+                <td className='px-4 py-2'>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      (validator.status as string) === 'active'
+                        ? 'bg-green-200 text-green-800'
+                        : (validator.status as string) === 'activating'
+                        ? 'bg-yellow-200 text-yellow-800'
+                        : 'bg-red-200 text-red-800'
+                    }`}
+                  >
+                    {validator.status as string}
+                  </span>
+                </td>
+                <td className='px-4 py-2'>
+                  {isNaN(Number(validator.balance))
+                    ? 'N/A'
+                    : `${(Number(validator.balance) / 1000000000).toFixed(5)} ETH`}
+                </td>
+                <td className='px-4 py-2'>
+                  {validator.exit_estimate?.estimated_exit_time
+                    ? new Date(validator.exit_estimate.estimated_exit_time).toLocaleString()
+                    : 'N/A'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className='flex justify-between items-center mt-4'>
         <button
           className='bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50'
@@ -269,22 +297,28 @@ const ValidatorsTable = () => {
             <button
               key={i + 1}
               onClick={() => paginate(i + 1)}
-              className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              className={`px-3 py-1 mx-1 rounded ${
+                currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+              }`}
             >
               {i + 1}
             </button>
           ))}
         </div>
         <div>
-          <label htmlFor='entriesPerPage' className='mr-2'>Entries per page:</label>
+          <label htmlFor='entriesPerPage' className='mr-2'>
+            Entries per page:
+          </label>
           <select
             id='entriesPerPage'
             value={validatorsPerPage}
-            onChange={(e) => setValidatorsPerPage(Number(e.target.value))}
+            onChange={e => setValidatorsPerPage(Number(e.target.value))}
             className='p-2 border border-gray-300 rounded-md'
           >
             {[10, 20, 50, 100].map(number => (
-              <option key={number} value={number}>{number}</option>
+              <option key={number} value={number}>
+                {number}
+              </option>
             ))}
           </select>
         </div>
