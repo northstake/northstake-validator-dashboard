@@ -1,15 +1,17 @@
 import React from 'react'
 import { useApi } from '../context/ApiContext'
+import { FaSignOutAlt } from 'react-icons/fa'
 
-const LogoutButton = () => {
+const LogoutButton = ({ className = '' }) => {
   const { logout } = useApi()
 
   return (
     <button
       onClick={logout}
-      className='bg-red-500 hover:bg-red-600 text-white font-bold py-0 px-4 rounded w-full  m-5 mb-2 h-6'
+      className={`flex items-center justify-center text-sm text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md transition-colors duration-150 w-full ${className}`}
     >
-      Logout
+      <FaSignOutAlt className="mr-2" />
+      Sign out
     </button>
   )
 }

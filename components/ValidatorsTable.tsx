@@ -155,60 +155,74 @@ const ValidatorsTable = () => {
   }
 
   return (
-    <div className='overflow-x-auto'>
-      <div className='mb-4'>
-        {['active', 'activating', 'exited'].map(status => (
-          <label key={status} className='mr-4'>
-            <input
-              type='checkbox'
-              checked={selectedStatuses.has(status)}
-              onChange={() => handleStatusChange(status)}
-              className='mr-2'
-            />
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </label>
-        ))}
+    <div className='overflow-x-auto bg-white shadow-lg rounded-lg'>
+      <div className='p-3 border-b'>
+        <h2 className='text-lg font-semibold text-gray-800 mb-2'>Validator Status Filter</h2>
+        <div className='flex space-x-4'>
+          {['active', 'activating', 'exited'].map(status => (
+            <label key={status} className='inline-flex items-center'>
+              <input
+                type='checkbox'
+                checked={selectedStatuses.has(status)}
+                onChange={() => handleStatusChange(status)}
+                className='form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-400'
+              />
+              <span className='ml-2 text-sm text-gray-700 capitalize'>{status}</span>
+            </label>
+          ))}
+        </div>
       </div>
-      <div>
-        <div className='flex justify-center items-center h-4'>{isRefreshing && <div className='loader'></div>}</div>
-        <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-          <thead className='bg-gray-900 h-12'>
+      <div className='p-3'>
+        <div className='flex justify-center items-center h-4 mb-2'>
+          {isRefreshing && <div className='loader'></div>}
+        </div>
+        <table className='min-w-full divide-y divide-gray-200 text-sm'>
+          <thead className='bg-gray-50'>
             <tr>
-              <th className='px-4 py-2 text-left text-gray-100 w-12'>Select</th>
+              <th scope='col' className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Select
+              </th>
               <th
-                className='px-2 py-2 text-left text-gray-100 w-24 cursor-pointer'
+                scope='col'
+                className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
                 onClick={() => requestSort('validator_index')}
               >
                 Validator index
               </th>
               <th
-                className='px-4 py-2 text-left text-gray-100 cursor-pointer'
+                scope='col'
+                className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
                 onClick={() => requestSort('validator_public_key')}
               >
                 Public Key
               </th>
               <th
-                className='px-4 py-2 text-left text-gray-100 cursor-pointer w-12'
+                scope='col'
+                className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
                 onClick={() => requestSort('status')}
               >
                 Status
               </th>
-              <th className='px-4 py-2 text-left text-gray-100 cursor-pointer' onClick={() => requestSort('balance')}>
+              <th
+                scope='col'
+                className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                onClick={() => requestSort('balance')}
+              >
                 Balance
               </th>
               <th
-                className='px-4 py-2 text-left text-gray-100 cursor-pointer'
+                scope='col'
+                className='px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
                 onClick={() => requestSort('exit_estimate.estimated_exit_time')}
               >
                 Estimated exit time
               </th>
             </tr>
           </thead>
-
-          <tbody>
+          <tbody className='bg-white divide-y divide-gray-200'>
             {currentValidators.map(validator => (
-              <tr key={validator.validator_public_key} className='border-b border-gray-200 hover:bg-gray-100'>
-                <td className='px-4 py-2'>
+              <tr key={validator.validator_public_key} className='hover:bg-gray-50'>
+                <td className='px-3 py-2 whitespace-nowrap'>
                   <input
                     type='checkbox'
                     checked={selectedValidators.has(validator.validator_index?.toString() ?? '')}
@@ -216,14 +230,13 @@ const ValidatorsTable = () => {
                     disabled={
                       validator.status !== ('active' as string) ||
                       rfqs.some(rfq =>
-                        rfq.validators.some(
-                          v => v.validator_index?.toString() === validator.validator_index?.toString()
-                        )
+                        rfq.validators.some(v => v.validator_index?.toString() === validator.validator_index?.toString())
                       )
                     }
+                    className='form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-400'
                   />
                 </td>
-                <td className='px-2 py-2'>
+                <td className='px-3 py-2 whitespace-nowrap text-xs text-gray-900'>
                   {validator.validator_index ? (
                     <a
                       href={`https://${api?.server === 'test' ? 'holesky.' : ''}beaconcha.in/validator/${
@@ -231,7 +244,7 @@ const ValidatorsTable = () => {
                       }`}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='text-blue-600 hover:underline'
+                      className='text-blue-600 hover:text-blue-900'
                     >
                       {validator.validator_index}
                     </a>
@@ -239,42 +252,44 @@ const ValidatorsTable = () => {
                     'N/A'
                   )}
                 </td>
-                <td className='px-4 py-2 flex items-center space-x-2'>
-                  <input
-                    type='text'
-                    value={validator.validator_public_key ?? ''}
-                    readOnly
-                    className='w-full px-2 py-1 border rounded text-gray-700 bg-gray-100'
-                  />
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(validator.validator_public_key ?? '')
-                      toast.success('Copied to clipboard')
-                    }}
-                    className='text-gray-500 hover:text-gray-200 transition duration-150 ml-2'
-                  >
-                    <FaCopy />
-                  </button>
+                <td className='px-3 py-2 whitespace-nowrap text-xs text-gray-500'>
+                  <div className='flex items-center'>
+                    <input
+                      type='text'
+                      value={validator.validator_public_key ?? ''}
+                      readOnly
+                      className='flex-grow px-1 py-0.5 text-xs border rounded text-gray-700 bg-gray-50'
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(validator.validator_public_key ?? '')
+                        toast.success('Copied to clipboard')
+                      }}
+                      className='ml-1 text-gray-400 hover:text-gray-600 focus:outline-none'
+                    >
+                      <FaCopy size={12} />
+                    </button>
+                  </div>
                 </td>
-                <td className='px-4 py-2'>
+                <td className='px-3 py-2 whitespace-nowrap'>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${
+                    className={`px-1.5 py-0.5 inline-flex text-xs leading-4 font-medium rounded-full ${
                       (validator.status as string) === 'active'
-                        ? 'bg-green-200 text-green-800'
+                        ? 'bg-green-100 text-green-800'
                         : (validator.status as string) === 'activating'
-                        ? 'bg-yellow-200 text-yellow-800'
-                        : 'bg-red-200 text-red-800'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
                     }`}
                   >
                     {validator.status as string}
                   </span>
                 </td>
-                <td className='px-4 py-2'>
+                <td className='px-3 py-2 whitespace-nowrap text-xs text-gray-500'>
                   {isNaN(Number(validator.balance))
                     ? 'N/A'
                     : `${(Number(validator.balance) / 1000000000).toFixed(5)} ETH`}
                 </td>
-                <td className='px-4 py-2'>
+                <td className='px-3 py-2 whitespace-nowrap text-xs text-gray-500'>
                   {validator.exit_estimate?.estimated_exit_time
                     ? new Date(validator.exit_estimate.estimated_exit_time).toLocaleString()
                     : 'N/A'}
@@ -284,7 +299,7 @@ const ValidatorsTable = () => {
           </tbody>
         </table>
       </div>
-      <div className='flex justify-between items-center mt-4'>
+      <div className='flex justify-between items-center mt-4 p-4'>
         <button
           className='bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50'
           onClick={openWalletSelectionModal}

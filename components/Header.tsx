@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import { useUser } from '@/context/userContext'
-import { FaUserCircle, FaEthereum, FaCoins, FaBell, FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt } from 'react-icons/fa'
+import { FaUserCircle, FaEthereum, FaCoins, FaBell, FaCheckCircle, FaDollarSign, FaFileContract, FaHandHoldingUsd, FaUnlockAlt, FaExchangeAlt, FaSignOutAlt, FaTimes, FaWallet } from 'react-icons/fa'
 import LogoutButton from './Logoutbutton'
 import { ethers } from 'ethers'
 import { toast } from 'react-toastify'
@@ -202,11 +202,21 @@ const Header = () => {
 
   return (
     <div className='bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-2 pr-6 pl-3 flex items-center justify-between'>
-      <div className='flex items-center'>
-        <Image src='/northstake_2.png' alt='Northstake' width={42} height={42} className='h-12 w-12 mr-2' /> {/* Add your logo here */}
-        <span className='font-bold text-lg uppercase'>Validator marketplace dashboard</span>
+      <div className='flex items-center space-x-4'>
+        <div className='flex items-center'>
+          <Image 
+            src='/northstake_2.png' 
+            alt='Northstake' 
+            width={48} 
+            height={48} 
+            className='h-12 w-12 transition-transform duration-300 hover:scale-110'
+          />
+        </div>
+        <div className='flex flex-col'>
+          <span className='font-bold text-xl text-white tracking-wide'>Northstake</span>
+          <span className='text-sm text-gray-300 uppercase tracking-wider'>Validator Marketplace</span>
+        </div>
       </div>
-
       <div className='flex items-center'>
         {actionableRFQs.length > 0 && (
           <div className='relative' ref={notificationDropdownRef}>
@@ -244,22 +254,26 @@ const Header = () => {
               <FaUserCircle className='text-2xl' />
             </button>
             {userDropdownOpen && (
-              <div className='absolute right-0 mt-2 w-56 bg-white text-black rounded-lg shadow-lg py-2'>
-                <p className='px-4 py-2 border-b border-gray-200 text-sm'>{`${userInfo?.email}`}</p>
-                <p className='px-4 py-2 text-sm'>
+              <div className='absolute right-0 mt-2 w-64 bg-white text-gray-800 rounded-lg shadow-xl py-2 border border-gray-200'>
+                <div className='px-4 py-3 border-b border-gray-200'>
+                  <p className='text-sm font-medium text-gray-600'>Signed in as</p>
+                  <p className='text-sm font-bold truncate'>{userInfo?.email}</p>
+                </div>
+                <div className='px-4 py-2'>
                   <a
                     href={`${etherscanUrl}${userInfo?.smartContracts?.[0]?.address}`}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-blue-500 hover:text-blue-700 underline'
+                    className='flex items-center text-sm text-gray-700 hover:bg-gray-100 px-2 py-2 rounded-md transition-colors duration-150'
                   >
-                    Smart Contract
+                    <FaFileContract className="mr-2" />
+                    View Smart Contract
                   </a>
-                </p>
+                </div>
                 <div className='px-4 py-2'>
-                  <label className='block text-sm font-medium text-gray-700'>Server</label>
+                  <label className='block text-xs font-medium text-gray-600 mb-1'>Server</label>
                   <select
-                    className='mt-1 block w-full p-2 bg-gray-200 text-black rounded'
+                    className='w-full p-2 bg-gray-100 text-gray-800 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                     value={server}
                     onChange={handleServerChange}
                   >
@@ -268,7 +282,7 @@ const Header = () => {
                     <option value='production'>Production</option>
                   </select>
                 </div>
-                <div className='flex justify-center'>
+                <div className='px-4 py-2 mt-2 border-t border-gray-200'>
                   <LogoutButton />
                 </div>
               </div>
@@ -277,88 +291,90 @@ const Header = () => {
         )}
       </div>
 
-      {walletModalOpen && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white text-black rounded-lg shadow-lg p-6 w-96'>
-            {isConnected && (
-              <div className='flex items-center justify-between mb-4' title='Available Rewards'>
-                <div className='flex items-center'>
-                  <FaCoins className='text-yellow-400 mr-2' />
-                  <span className='font-semibold'>{parseFloat(availableRewards).toFixed(4)} ETH</span>
-                </div>
-                <button
-                  onClick={handleCollectRewards}
-                  className='bg-yellow-500 hover:bg-yellow-600 text-white rounded-full p-2 flex items-center'
-                  title='Withdraw Rewards'
-                >
-                  <FaCoins className='text-lg' />
-                  <span className='ml-2'>Withdraw</span>
-                </button>
-              </div>
-            )}
-            <h2 className='text-2xl font-bold mb-6'>Wallet Actions</h2>
-            {!isConnected && (
-              <div className='mb-4'>
-                <h3 className='text-lg font-semibold mb-2'>Connect Wallet</h3>
-
-                <div className='space-y-2'>
-                  {connectors.map(connector => (
-                    <button
-                      key={connector.id}
-                      onClick={() => connect({ connector })}
-                      className='w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600'
-                    >
-                      {connector.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {isConnected && (
-              <div className='space-y-4'>
-                <button
-                  onClick={() => openWalletModal('deposit')}
-                  className='w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center'
-                >
-                  <FaEthereum className='mr-2' />
-                  <span>Deposit 32 ETH (new validator)</span>
-                </button>
-                <button
-                  onClick={() => openWalletModal('acceptExit')}
-                  className='w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center'
-                >
-                  <FaEthereum className='mr-2' />
-                  <span>Accept exit proposal</span>
-                </button>
-                <button
-                  onClick={() => disconnect()}
-                  className='w-full p-3 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center justify-center'
-                >
-                  Disconnect Wallet
-                </button>
-              </div>
-            )}
-            <button
-              onClick={closeWalletModal}
-              className='mt-6 w-full p-3 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400'
-            >
-              Close
-            </button>
-            {userInfo?.smartContracts?.[0]?.address && (
-              <div className='mt-4 text-center'>
-                <a
-                  href={`${etherscanUrl}${userInfo.smartContracts[0].address}`}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-blue-500 hover:text-blue-700 underline text-sm'
-                >
-                  View Smart Contract on Etherscan
-                </a>
-              </div>
-            )}
+{walletModalOpen && (
+  <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+    <div className='bg-white text-gray-800 rounded-lg shadow-xl p-6 w-96 max-w-md'>
+      {isConnected && (
+        <div className='flex items-center justify-between mb-6 pb-4 border-b border-gray-200'>
+          <div className='flex items-center' title='Available Rewards'>
+            <FaCoins className='text-yellow-500 mr-2' />
+            <span className='font-semibold'>{parseFloat(availableRewards).toFixed(4)} ETH</span>
           </div>
+          <button
+            onClick={handleCollectRewards}
+            className='bg-yellow-500 hover:bg-yellow-600 text-white rounded-full p-2 flex items-center transition-colors duration-150'
+            title='Withdraw Rewards'
+          >
+            <FaCoins className='text-sm' />
+            <span className='ml-2 text-sm'>Withdraw</span>
+          </button>
         </div>
       )}
+      <h2 className='text-2xl font-bold mb-6'>Wallet Actions</h2>
+      {!isConnected ? (
+        <div className='mb-6'>
+          <h3 className='text-lg font-semibold mb-3'>Connect Wallet</h3>
+          <div className='space-y-2'>
+            {connectors.map(connector => (
+              <button
+                key={connector.id}
+                onClick={() => connect({ connector })}
+                className='w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-150 flex items-center justify-center'
+              >
+                <FaWallet className='mr-2' />
+                {connector.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className='space-y-4 mb-6'>
+          <button
+            onClick={() => openWalletModal('deposit')}
+            className='w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center transition-colors duration-150'
+          >
+            <FaEthereum className='mr-2' />
+            <span>Deposit 32 ETH (new validator)</span>
+          </button>
+          <button
+            onClick={() => openWalletModal('acceptExit')}
+            className='w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center transition-colors duration-150'
+          >
+            <FaExchangeAlt className='mr-2' />
+            <span>Accept exit proposal</span>
+          </button>
+          <button
+            onClick={() => disconnect()}
+            className='w-full p-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 flex items-center justify-center transition-colors duration-150'
+          >
+            <FaSignOutAlt className='mr-2' />
+            Disconnect Wallet
+          </button>
+        </div>
+      )}
+      <button
+        onClick={closeWalletModal}
+        className='w-full p-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 flex items-center justify-center transition-colors duration-150'
+      >
+        <FaTimes className='mr-2' />
+        Close
+      </button>
+      {userInfo?.smartContracts?.[0]?.address && (
+        <div className='mt-4 text-center'>
+          <a
+            href={`${etherscanUrl}${userInfo.smartContracts[0].address}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-500 hover:text-blue-700 underline text-sm flex items-center justify-center'
+          >
+            <FaFileContract className='mr-2' />
+            View Smart Contract on Etherscan
+          </a>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
       {selectedAction && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
