@@ -1,23 +1,24 @@
 'use client'
 import React, { useState } from 'react';
 
-const ApiCredentialsForm = ({ onSubmit }: { onSubmit: (apiCredentials: { apiKey: string; privateKey: string; server: string }, keepSignedIn: boolean) => void }) => {
+const ApiCredentialsForm = ({ onSubmit }: { onSubmit: (apiCredentials: { apiKey: string; privateKey: string }, keepSignedIn: boolean) => void }) => {
   const [apiKey, setApiKey] = useState('');
   const [privateKey, setPrivateKey] = useState('');
-  const [server, setServer] = useState('test');
   const [keepSignedIn, setKeepSignedIn] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ apiKey, privateKey, server }, keepSignedIn);
+    onSubmit({ apiKey, privateKey }, keepSignedIn);
   };
 
   const handlePrivateKeyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    //we need to replace /n with actual newlines
+    // we need to replace /n with actual newlines
     const formattedValue = value.replace(/\\n/g, '\n');
     setPrivateKey(formattedValue);
   };
+
+  const server = process.env.NEXT_PUBLIC_SERVER || 'test';
 
   return (
     <form onSubmit={handleSubmit}>
@@ -40,17 +41,6 @@ const ApiCredentialsForm = ({ onSubmit }: { onSubmit: (apiCredentials: { apiKey:
           required
           style={{ height: '250px', fontSize: '8px' }}
         />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-300">Server</label>
-        <select
-          value={server}
-          onChange={(e) => setServer(e.target.value)}
-          className="mt-1 block w-full p-2 bg-gray-700 text-white rounded"
-        >
-          <option value="test">Test</option>
-          <option value="production">Production</option>
-        </select>
       </div>
       <div className="mb-4">
         <label className="inline-flex items-center">
