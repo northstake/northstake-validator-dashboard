@@ -9,14 +9,16 @@ const LockScreen = () => {
   const { setUserInfo, setContractAddress, setLoading } = useUser()
   const [isVerifying, setIsVerifying] = useState(true)
 
-  const verifyApi = async (apiCredentials: { apiKey: string; privateKey: string; server: string }) => {
+  const server = process.env.NEXT_PUBLIC_SERVER || 'test'
+
+  const verifyApi = async (apiCredentials: { apiKey: string; privateKey: string }) => {
     try {
       const response = await fetch('/api/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(apiCredentials)
+        body: JSON.stringify({ ...apiCredentials, server })
       })
       const data = await response.json()
       if (data.success && data.user && data.user.userId) {
@@ -51,11 +53,11 @@ const LockScreen = () => {
     initialVerify()
   }, [api, logout])
 
-  const handleApiSubmit = async (apiCredentials: { apiKey: string; privateKey: string; server: string }, keepSignedIn: boolean) => {
+  const handleApiSubmit = async (apiCredentials: { apiKey: string; privateKey: string }, keepSignedIn: boolean) => {
     setIsVerifying(true)
     const isValid = await verifyApi(apiCredentials)
     if (isValid) {
-      setApi(apiCredentials, keepSignedIn)
+      setApi({ ...apiCredentials, server }, keepSignedIn)
     } else {
       setIsVerifying(false)
     }
@@ -83,6 +85,7 @@ const LockScreen = () => {
         <h2 className="text-2xl font-semibold text-white text-center mb-4">API Credentials Required</h2>
         <p className="text-sm text-gray-400 text-center mb-6">Please enter your API credentials to get started.</p>
         <ApiCredentialsForm onSubmit={handleApiSubmit} />
+        <p className="text-sm text-gray-400 text-center mt-4">Server: {server}</p>
       </div>
     </div>
   )

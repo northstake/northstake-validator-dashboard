@@ -10,7 +10,9 @@ import {
   AccountEntity,
 } from '@northstake/northstakeapi'
 
-export const initializeApi = (apiKey: string, privateKey: string, server: string) => {
+const server = process.env.NEXT_PUBLIC_SERVER || 'test'
+
+export const initializeApi = (apiKey: string, privateKey: string) => {
   const apiUrl = {
     localhost: 'http://localhost:8080/v1',
     test: 'https://test.api.northstake.dk/v1',
