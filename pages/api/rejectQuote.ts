@@ -3,14 +3,14 @@ import { initializeApi, rejectQuote } from '../../app/api'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, server, rfqId, quoteId } = req.body
+    const { apiKey, privateKey, rfqId, quoteId } = req.body
 
-    if (!apiKey || !privateKey || !server || !rfqId || !quoteId) {
+    if (!apiKey || !privateKey || !rfqId || !quoteId) {
       return res.status(400).json({ success: false, error: 'Missing required fields' })
     }
 
     try {
-      const api = initializeApi(apiKey, privateKey, server)
+      const api = initializeApi(apiKey, privateKey)
       await rejectQuote(api, rfqId, quoteId)
       return res.status(200).json({ success: true })
     } catch (error) {
