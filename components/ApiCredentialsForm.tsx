@@ -18,7 +18,6 @@ const ApiCredentialsForm = ({ onSubmit }: { onSubmit: (apiCredentials: { apiKey:
     setPrivateKey(formattedValue);
   };
 
-  const server = process.env.NEXT_PUBLIC_SERVER || 'test';
 
   return (
     <form onSubmit={handleSubmit}>
