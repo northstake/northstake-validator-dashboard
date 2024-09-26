@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       await rejectQuote(api, rfqId, quoteId)
       return res.status(200).json({ success: true })
     } catch (error) {

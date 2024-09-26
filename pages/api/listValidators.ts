@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { initializeApi, listValidators as list } from '../../app/api'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { apiKey, privateKey } = req.body
+  if (req.method === 'GET') {
+
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       const validators = await list(api)
       res.status(200).json({ success: true, validators })
     } catch (error: unknown) {

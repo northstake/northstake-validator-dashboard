@@ -3,9 +3,9 @@ import { initializeApi, listWallets as list } from '../../app/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey } = req.body
+
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       const wallets = await list(api);
       res.status(200).json({ success: true, wallets });
     } catch (error: unknown) {

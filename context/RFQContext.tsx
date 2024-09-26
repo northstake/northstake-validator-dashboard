@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
-import { useApi } from './ApiContext'
 import NotificationBar from '@/components/NotificationBar'
 
 interface RFQContextType {
@@ -20,54 +19,46 @@ We need to keep our RFQ documents in context so that we can access them througho
 const RFQContext = createContext<RFQContextType | undefined>(undefined)
 
 export const RFQProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { api } = useApi()
   const [rfqs, setRFQs] = useState<RFQDocumentSeller[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [notification, setNotification] = useState<Notification | null>(null)
   const prevRFQsRef = useRef<RFQDocumentSeller[]>([])
 
   const fetchRFQs = async () => {
-    if (api) {
-      setIsRefreshing(true)
-      try {
-        const response = await fetch('/api/listRFQDocuments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            apiKey: api.apiKey,
-            privateKey: api.privateKey,
-            server: api.server
-          })
+    setIsRefreshing(true)
+    try {
+      const response = await fetch('/api/listRFQDocuments', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      })
+      const result = await response.json()
+      if (result.success && Array.isArray(result.documents)) {
+        const orderedRFQs = result.documents.sort((a: RFQDocumentSeller, b: RFQDocumentSeller) => {
+          if (a.status.toLowerCase() === 'active' && b.status.toLowerCase() !== 'active') {
+            return -1
+          }
+          if (a.status.toLowerCase() !== 'active' && b.status.toLowerCase() === 'active') {
+            return 1
+          }
+          return 0
         })
-        const result = await response.json()
-        if (result.success && Array.isArray(result.documents)) {
-          const orderedRFQs = result.documents.sort((a: RFQDocumentSeller, b: RFQDocumentSeller) => {
-            if (a.status.toLowerCase() === 'active' && b.status.toLowerCase() !== 'active') {
-              return -1
-            }
-            if (a.status.toLowerCase() !== 'active' && b.status.toLowerCase() === 'active') {
-              return 1
-            }
-            return 0
-          })
-          setRFQs(orderedRFQs)
-        } else {
-          console.error(result.error)
-        }
-      } catch (error) {
-        console.error('Failed to fetch RFQ documents', error)
+        setRFQs(orderedRFQs)
+      } else {
+        console.error(result.error)
       }
-      setIsRefreshing(false)
+    } catch (error) {
+      console.error('Failed to fetch RFQ documents', error)
     }
+    setIsRefreshing(false)
   }
 
   useEffect(() => {
     fetchRFQs()
     const interval = setInterval(fetchRFQs, 10000) // Refresh every 10 seconds
     return () => clearInterval(interval)
-  }, [api])
+  }, [])
 
   useEffect(() => {
     if (prevRFQsRef.current.length > 0) {

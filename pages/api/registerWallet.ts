@@ -4,9 +4,9 @@ import { AddLinkedWalletRequest } from '@northstake/northstakeapi'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, walletName, walletAddress } = req.body
+    const { walletName, walletAddress } = req.body
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       const request: AddLinkedWalletRequest = {
         walletName,
         walletAddress,

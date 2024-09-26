@@ -3,9 +3,9 @@ import { initializeApi, removeWallet } from '../../app/api'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, walletId } = req.body
+    const {walletId } = req.body
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       console.log('removeing wallet', walletId)
       const result = await removeWallet(api, walletId)
       res.status(200).json({ success: true, result })

@@ -4,9 +4,9 @@ import { WebhookRegistration } from '@northstake/northstakeapi'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, authToken, url, webhookType } = req.body
+    const { authToken, url, webhookType } = req.body
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       const request: WebhookRegistration = {
         secret: authToken,
         url,

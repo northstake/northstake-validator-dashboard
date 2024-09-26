@@ -1,24 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import ApiCredentialsForm from './ApiCredentialsForm'
-import { useApi } from '../context/ApiContext'
 import { useUser } from '../context/userContext'
 import { toast } from 'react-toastify'
 
 const LockScreen = () => {
-  const { api, setApi, logout } = useApi()
   const { setUserInfo, setContractAddress, setLoading } = useUser()
   const [isVerifying, setIsVerifying] = useState(true)
 
-  const server = process.env.NEXT_PUBLIC_SERVER || 'test'
-
-  const verifyApi = async (apiCredentials: { apiKey: string; privateKey: string }) => {
+  const verifyApi = async () => {
     try {
       const response = await fetch('/api/user', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ...apiCredentials, server })
+        }
       })
       const data = await response.json()
       if (data.success && data.user && data.user.userId) {
@@ -40,24 +35,21 @@ const LockScreen = () => {
 
   useEffect(() => {
     const initialVerify = async () => {
-      if (api) {
-        const isValid = await verifyApi(api)
+      if (process.env.API_KEY && process.env.PRIVATE_KEY) {
+        const isValid = await verifyApi()
         if (!isValid) {
-          logout()
+          setIsVerifying(false)
         }
-        setIsVerifying(false)
-      } else {
-        setIsVerifying(false)
       }
     }
     initialVerify()
-  }, [api, logout])
+  }, [])
 
-  const handleApiSubmit = async (apiCredentials: { apiKey: string; privateKey: string }, keepSignedIn: boolean) => {
+  const handleApiSubmit = async () => {
     setIsVerifying(true)
-    const isValid = await verifyApi(apiCredentials)
+    const isValid = await verifyApi()
     if (isValid) {
-      setApi({ ...apiCredentials, server }, keepSignedIn)
+      // No need to set API credentials in context or cookies
     } else {
       setIsVerifying(false)
     }
@@ -85,7 +77,7 @@ const LockScreen = () => {
         <h2 className="text-2xl font-semibold text-white text-center mb-4">API Credentials Required</h2>
         <p className="text-sm text-gray-400 text-center mb-6">Please enter your API credentials to get started.</p>
         <ApiCredentialsForm onSubmit={handleApiSubmit} />
-        <p className="text-sm text-gray-400 text-center mt-4">Server: {server}</p>
+        <p className="text-sm text-gray-400 text-center mt-4">Server: {process.env.NEXT_PUBLIC_SERVER}</p>
       </div>
     </div>
   )

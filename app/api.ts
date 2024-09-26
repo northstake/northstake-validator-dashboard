@@ -7,19 +7,27 @@ import {
   WebHookLookupAnswer,
   WebhookRegistration,
   CreateRFQRequest,
-  AccountEntity,
+  AccountEntity
 } from '@northstake/northstakeapi'
 
-const server = process.env.NEXT_PUBLIC_SERVER || 'test'
-
-export const initializeApi = (apiKey: string, privateKey: string) => {
+export const initializeApi = (
+  apiKey = process.env.API_KEY,
+  privateKey = process.env.PRIVATE_KEY,
+  server = process.env.NEXT_PUBLIC_SERVER || 'test'
+) => {
   const apiUrl = {
     localhost: 'http://localhost:8080/v1',
     test: 'https://test.api.northstake.dk/v1',
     production: 'https://api.northstake.dk/v1'
-  }[server]
+  }[server as 'localhost' | 'test' | 'production']
 
-  const api = new NorthstakeApi(apiKey, privateKey, apiUrl)
+  if (!apiKey || !privateKey || !apiUrl) {
+    throw new Error('API_KEY, PRIVATE_KEY, and SERVER must be provided during login or set in .env')
+  }
+  //remove \n newlines and replace with actual newlines
+  const cleanedApiKey = apiKey.replace(/\\n/g, '\n')
+  const cleanedPrivateKey = privateKey.replace(/\\n/g, '\n')
+  const api = new NorthstakeApi(cleanedApiKey, cleanedPrivateKey, apiUrl)
   return api
 }
 

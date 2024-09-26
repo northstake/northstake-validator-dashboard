@@ -5,15 +5,15 @@ import ValidatorsTable from './ValidatorsTable'
 import WebhooksTable from './WebhooksTable'
 import WalletsTable from './WalletsTable'
 import RFQsTable from './RFQsTable'
-import { useApi } from '../context/ApiContext'
+import { useUser } from '../context/userContext'
 import LockScreen from './LockScreen'
 
 const Dashboard = ({ activeSection }: { activeSection: 'validators' | 'rfqs' | 'wallets' | 'webhooks' }) => {
-  const { api } = useApi()
+  const { userInfo } = useUser()
 
-  if (!api) {
+  if (!userInfo) {
     return <LockScreen />
-  }
+  } 
 
   return (
     <main className='main-view flex-1 overflow-x-hidden overflow-y-auto'>

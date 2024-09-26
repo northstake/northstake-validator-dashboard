@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApi } from '../context/ApiContext'
+
 import { RFQDocumentSeller } from '@northstake/northstakeapi'
 import React from 'react'
 import { toast } from 'react-toastify'
@@ -17,26 +17,21 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
   const steps = Object.entries(rfq.settlement_steps || {})
 
   const sortedSteps = steps.sort((a, b) => {
-    const timestampA = new Date(a[1]?.timestamp).getTime() || 0;
-    const timestampB = new Date(b[1]?.timestamp).getTime() || 0;
-    return timestampA - timestampB;
+    const timestampA = new Date(a[1]?.timestamp).getTime() || 0
+    const timestampB = new Date(b[1]?.timestamp).getTime() || 0
+    return timestampA - timestampB
   })
 
-  const { api } = useApi()
   const { contractAddress, contractABI } = useUser()
   const { writeContract } = useWriteContract()
 
   const getEtherscanLink = (txHash: string) => {
-    const baseUrl = api?.server === 'production' ? 'https://etherscan.io' : 'https://holesky.etherscan.io'
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SERVER === 'production' ? 'https://etherscan.io' : 'https://holesky.etherscan.io'
     return `${baseUrl}/tx/${txHash}`
   }
 
   const handleProposalExit = async (proposalId: string) => {
-    if (!api) {
-      toast.error('No API credentials found')
-      return
-    }
-
     try {
       await writeContract({
         address: contractAddress as `0x${string}`,
@@ -53,36 +48,30 @@ const ExpandedContent = ({ rfq }: { rfq: RFQDocumentSeller }) => {
 
   // Function to check whether we have a step that is named Withdrawal recipient settlement
   const hasWithdrawalRecipientSettlement = sortedSteps.some(step => step[0] === 'withdrawal_recipient_settlement')
-const iconMapping = {
-  'accepted_quote': <FaCheckCircle />,
-  'escrow_payment': <FaDollarSign />,
-  'exit_proposal': <FaFileContract />,
-  'withdrawal_recipient_settlement': <FaHandHoldingUsd />,
-  'escrow_released': <FaUnlockAlt />
-}
+  const iconMapping = {
+    accepted_quote: <FaCheckCircle />,
+    escrow_payment: <FaDollarSign />,
+    exit_proposal: <FaFileContract />,
+    withdrawal_recipient_settlement: <FaHandHoldingUsd />,
+    escrow_released: <FaUnlockAlt />
+  }
 
-
-    return (
+  return (
     <tr>
       <td colSpan={6}>
         <div className='p-4 bg-gray-50'>
-            <VerticalTimeline
-              animate={true}
-              layout={'1-column'}
-              lineColor='rgb(33, 150, 243)'
-              
-            >
+          <VerticalTimeline animate={true} layout={'1-column'} lineColor='rgb(33, 150, 243)'>
             {sortedSteps &&
               sortedSteps.map(([stepName, stepData]) => (
                 <VerticalTimelineElement
                   key={stepName}
                   date={new Date(stepData.timestamp).toLocaleString()}
-                  iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}      
+                  iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
                   //make sure nothing overflows in the content card
-                   contentArrowStyle={{ borderRight: '7px solid  rgb(33, 150, 243)' }}
+                  contentArrowStyle={{ borderRight: '7px solid  rgb(33, 150, 243)' }}
                   contentStyle={{ overflow: 'auto' }}
                   icon={iconMapping[stepName as keyof typeof iconMapping]}
-                  style={{margin:'1em'}}
+                  style={{ margin: '1em' }}
                 >
                   <h5 className='font-semibold'>
                     {stepName.replace(/_/g, ' ').charAt(0).toUpperCase() + stepName.replace(/_/g, ' ').slice(1)}
@@ -90,35 +79,40 @@ const iconMapping = {
                   <ul>
                     {stepData &&
                       typeof stepData === 'object' &&
-                      Object.entries(stepData).filter(([key]) => !key.includes('timestamp')).map(([key, value]) => (
-                        <li key={key} className='break-words'>
-                          {key}:{' '}
-                          {typeof value === 'string' && value.startsWith('0x') && key !== 'proposal_id' && value.length === 66 ? (
-                            <a
-                              href={getEtherscanLink(value)}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='text-blue-600 hover:underline break-all'
-                            >
-                              {value}
-                            </a>
-                          ) : typeof value === 'object' ? (
-                            JSON.stringify(value)
-                          ) : value !== null && value !== undefined ? (
-                            String(value)
-                          ) : (
-                            ''
-                          )}
-                          {key === 'proposal_id' && !hasWithdrawalRecipientSettlement && (
-                            <button
-                              onClick={() => handleProposalExit(value as string)}
-                              className='ml-2 text-green-600 hover:text-green-800'
-                            >
-                              Accept exit proposal
-                            </button>
-                          )}
-                        </li>
-                      ))}
+                      Object.entries(stepData)
+                        .filter(([key]) => !key.includes('timestamp'))
+                        .map(([key, value]) => (
+                          <li key={key} className='break-words'>
+                            {key}:{' '}
+                            {typeof value === 'string' &&
+                            value.startsWith('0x') &&
+                            key !== 'proposal_id' &&
+                            value.length === 66 ? (
+                              <a
+                                href={getEtherscanLink(value)}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='text-blue-600 hover:underline break-all'
+                              >
+                                {value}
+                              </a>
+                            ) : typeof value === 'object' ? (
+                              JSON.stringify(value)
+                            ) : value !== null && value !== undefined ? (
+                              String(value)
+                            ) : (
+                              ''
+                            )}
+                            {key === 'proposal_id' && !hasWithdrawalRecipientSettlement && (
+                              <button
+                                onClick={() => handleProposalExit(value as string)}
+                                className='ml-2 text-green-600 hover:text-green-800'
+                              >
+                                Accept exit proposal
+                              </button>
+                            )}
+                          </li>
+                        ))}
                   </ul>
                 </VerticalTimelineElement>
               ))}
@@ -136,7 +130,7 @@ const RFQsTable = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(
     new Set(['active', 'finished', 'rejected', 'expired', 'failed'])
   )
-  const { api } = useApi()
+
   const router = useRouter() // Use the useRouter hook
 
   useEffect(() => {
@@ -176,10 +170,6 @@ const RFQsTable = () => {
   }
 
   const handleAcceptQuote = async (rfqId: string, quoteId: string) => {
-    if (!api) {
-      toast.error('No API credentials found')
-      return
-    }
     if (confirm('Are you sure you want to accept this quote?')) {
       setLoadingQuoteId(quoteId)
       try {
@@ -189,9 +179,6 @@ const RFQsTable = () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            apiKey: api.apiKey,
-            privateKey: api.privateKey,
-            server: api.server,
             rfqId,
             quoteId
           })
@@ -214,10 +201,6 @@ const RFQsTable = () => {
   }
 
   const handleRejectQuote = async (rfqId: string, quoteId: string) => {
-    if (!api) {
-      toast.error('No API credentials found')
-      return
-    }
     if (confirm('Are you sure you want to reject this quote?')) {
       setLoadingQuoteId(quoteId)
       try {
@@ -227,9 +210,6 @@ const RFQsTable = () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            apiKey: api.apiKey,
-            privateKey: api.privateKey,
-            server: api.server,
             rfqId,
             quoteId
           })
@@ -319,9 +299,9 @@ const RFQsTable = () => {
                     {rfq.validators?.map((v, index) => (
                       <React.Fragment key={v.validator_index}>
                         <a
-                          href={`https://${api?.server === 'production' ? '' : 'holesky.'}beaconcha.in/validator/${
-                            v.validator_index
-                          }`}
+                          href={`https://${
+                            process.env.NEXT_PUBLIC_SERVER === 'production' ? '' : 'holesky.'
+                          }beaconcha.in/validator/${v.validator_index}`}
                           target='_blank'
                           rel='noopener noreferrer'
                           className='text-blue-600 hover:underline'
@@ -375,9 +355,9 @@ const RFQsTable = () => {
                   <td className='px-4 py-2'>
                     {rfq.unique_escrow_vault?.vault_address ? (
                       <a
-                        href={`https://${api?.server === 'production' ? '' : 'holesky.'}etherscan.io/address/${
-                          rfq.unique_escrow_vault.vault_address
-                        }`}
+                        href={`https://${
+                          process.env.NEXT_PUBLIC_SERVER === 'production' ? '' : 'holesky.'
+                        }etherscan.io/address/${rfq.unique_escrow_vault.vault_address}`}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='text-blue-600 hover:underline'

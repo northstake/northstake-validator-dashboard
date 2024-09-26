@@ -3,9 +3,9 @@ import { initializeApi, removeWebhook } from '../../app/api'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, webhookId } = req.body
+    const {webhookId } = req.body
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api =  initializeApi()
       const result = await removeWebhook(api, webhookId)
       res.status(200).json({ success: true, result })
     } catch (error: unknown) {

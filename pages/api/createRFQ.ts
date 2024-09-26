@@ -3,9 +3,9 @@ import { initializeApi, createRFQ } from '../../app/api'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { apiKey, privateKey, newRFQ } = req.body
+    const { newRFQ } = req.body
     try {
-      const api = initializeApi(apiKey, privateKey)
+      const api = initializeApi()
       const result = await createRFQ(api, newRFQ)
       res.status(200).json({ success: true, result })
     } catch (error: unknown) {

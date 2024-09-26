@@ -17,7 +17,7 @@ import {
   FaTimes,
   FaWallet
 } from 'react-icons/fa'
-import LogoutButton from './Logoutbutton'
+
 import { ethers } from 'ethers'
 import { toast } from 'react-toastify'
 import { useConnect, useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
@@ -26,7 +26,7 @@ import { config } from '@/config/wagmi'
 import Image from 'next/image'
 import { useRFQ } from '@/context/RFQContext'
 import Link from 'next/link'
-import { useApi } from '@/context/ApiContext'
+
 
 const Header = () => {
   const { userInfo, contractAddress, contractABI } = useUser()
@@ -44,7 +44,6 @@ const Header = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
   const [availableRewards, setAvailableRewards] = useState<string>('0')
-  const { api } = useApi()
   const iconMapping = {
     accepted_quote: <FaCheckCircle className='text-green-500' />,
     new_quote: <FaCheckCircle className='text-green-500' />,
@@ -132,7 +131,7 @@ const Header = () => {
   }, [isConnected, contractAddress])
 
   const etherscanUrl =
-    api?.server === 'test' ? 'https://holesky.etherscan.io/address/' : 'https://etherscan.io/address/'
+    process.env.NEXT_PUBLIC_SERVER === 'test' ? 'https://holesky.etherscan.io/address/' : 'https://etherscan.io/address/'
 
   const openWalletModal = (action: string) => {
     setSelectedAction(action)
@@ -288,10 +287,6 @@ const Header = () => {
                     <FaFileContract className='mr-2' />
                     View Smart Contract
                   </a>
-                </div>
-
-                <div className='px-4 py-2 mt-2 border-t border-gray-200'>
-                  <LogoutButton />
                 </div>
               </div>
             )}

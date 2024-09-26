@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useState, useEffect } from 'react'
-import { useApi } from '../context/ApiContext'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { v4 as uuidv4 } from 'uuid' // Import UUID library
@@ -14,7 +13,6 @@ const WebhookForm = ({
   onClose: () => void
   onWebhookAdded: Dispatch<SetStateAction<boolean | undefined>>
 }) => {
-  const { api } = useApi()
   const [authToken, setAuthToken] = useState('secret-key-here') // Prefill auth token
   const [url, setUrl] = useState('')
   const [selectedWebhookTypes, setSelectedWebhookTypes] = useState<string[]>([]) // Change to array
@@ -31,7 +29,7 @@ const WebhookForm = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (api) {
+   
       setIsLoading(true) // Start loading
       const promises = selectedWebhookTypes.map(webhookType =>
         fetch('/api/registerWebhook', {
@@ -40,9 +38,7 @@ const WebhookForm = ({
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            apiKey: api.apiKey,
-            privateKey: api.privateKey,
-            server: api.server,
+
             authToken,
             url,
             webhookType
@@ -67,7 +63,7 @@ const WebhookForm = ({
         }
         console.error(errors)
       }
-    }
+    
   }
 
   const handleWebhookTypeChange = (type: string) => {

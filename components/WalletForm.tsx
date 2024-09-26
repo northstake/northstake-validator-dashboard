@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { useApi } from '../context/ApiContext'
+
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { FaWallet } from 'react-icons/fa' // Import wallet icon
@@ -11,44 +11,39 @@ const WalletForm = ({
   onClose: () => void
   onWalletAdded: Dispatch<SetStateAction<boolean | undefined>>
 }) => {
-  const { api } = useApi()
   const [walletName, setWalletName] = useState('')
   const [walletAddress, setWalletAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false) // Add loading state
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (api) {
-      setIsLoading(true) // Start loading
-      const response = await fetch('/api/registerWallet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          apiKey: api.apiKey,
-          privateKey: api.privateKey,
-          server: api.server,
-          walletName,
-          walletAddress
-        })
-      })
 
-      const result = await response.json()
-      setIsLoading(false) // Stop loading
-      if (result.success) {
-        if (result.result.status === 400 && result.result.body.message === 'Wallet already exists') {
-          toast.error('Wallet already exists')
-        } else {
-          toast.success('Wallet registered successfully')
-          onWalletAdded(true) // Call the callback to refetch wallets
-          setTimeout(onClose, 2000)
-        }
+    setIsLoading(true) // Start loading
+    const response = await fetch('/api/registerWallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        walletName,
+        walletAddress
+      })
+    })
+
+    const result = await response.json()
+    setIsLoading(false) // Stop loading
+    if (result.success) {
+      if (result.result.status === 400 && result.result.body.message === 'Wallet already exists') {
+        toast.error('Wallet already exists')
       } else {
-        console.error(result.error)
-        toast.error('An error occurred while registering the wallet')
+        toast.success('Wallet registered successfully')
+        onWalletAdded(true) // Call the callback to refetch wallets
         setTimeout(onClose, 2000)
       }
+    } else {
+      console.error(result.error)
+      toast.error('An error occurred while registering the wallet')
+      setTimeout(onClose, 2000)
     }
   }
 
@@ -59,11 +54,7 @@ const WalletForm = ({
           <h1 className='text-2xl font-semibold text-gray-800 flex items-center'>
             <FaWallet className='mr-2' /> Register Wallet
           </h1>
-          <button
-            type='button'
-            onClick={onClose}
-            className='text-gray-500 hover:text-gray-700 transition duration-150'
-          >
+          <button type='button' onClick={onClose} className='text-gray-500 hover:text-gray-700 transition duration-150'>
             &times;
           </button>
         </div>

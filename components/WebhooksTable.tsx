@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useApi } from '../context/ApiContext'
 import { WebHookLookupAnswer } from '@northstake/northstakeapi'
 import Modal from './Modal'
 import WebhookForm from './WebhookForm'
@@ -8,61 +7,49 @@ import { FaTrash } from 'react-icons/fa'
 
 const WebhooksTable = () => {
   const [webhooks, setWebhooks] = useState<WebHookLookupAnswer[]>([])
-  const { api } = useApi()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [addedNewWebhook, setAddedNewWebhook] = useState<boolean | undefined>(undefined)
 
   useEffect(() => {
     const fetchWebhooks = async () => {
-      if (api) {
-        if (addedNewWebhook !== false) {
-          const response = await fetch('/api/listWebhooks', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              apiKey: api.apiKey,
-              privateKey: api.privateKey,
-              server: api.server
-            })
-          })
+      if (addedNewWebhook !== false) {
+        const response = await fetch('/api/listWebhooks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        })
 
-          const result = await response.json()
-          if (result.success) {
-            setWebhooks(result.webhooks)
-          } else {
-            console.error(result.error)
-          }
+        const result = await response.json()
+        if (result.success) {
+          setWebhooks(result.webhooks)
+        } else {
+          console.error(result.error)
         }
-        setAddedNewWebhook(false)
       }
+      setAddedNewWebhook(false)
     }
     fetchWebhooks()
-  }, [api, addedNewWebhook])
+  }, [addedNewWebhook])
 
   const deleteWebhook = async (webhookId: string) => {
-    if (api) {
-      const response = await fetch('/api/removeWebhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          apiKey: api.apiKey,
-          privateKey: api.privateKey,
-          server: api.server,
-          webhookId
-        })
+    const response = await fetch('/api/removeWebhook', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        webhookId
       })
+    })
 
-      const result = await response.json()
-      if (result.result.status === 204) {
-        toast.success('Webhook deleted successfully')
-        setWebhooks(webhooks.filter(webhook => webhook.id !== webhookId))
-      } else {
-        toast.error('Failed to delete webhook')
-      }
+    const result = await response.json()
+    if (result.result.status === 204) {
+      toast.success('Webhook deleted successfully')
+      setWebhooks(webhooks.filter(webhook => webhook.id !== webhookId))
+    } else {
+      toast.error('Failed to delete webhook')
     }
   }
 
@@ -85,7 +72,7 @@ const WebhooksTable = () => {
         <span className='text-xl font-bold'>+</span>
       </button>
       <table className='min-w-full bg-white shadow-md rounded-lg overflow-hidden'>
-      <thead className='bg-gray-900 h-12'>
+        <thead className='bg-gray-900 h-12'>
           <tr>
             <th className='px-4 py-2 text-left text-gray-100'>Event Type</th>
             <th className='px-4 py-2 text-left text-gray-100'>URL</th>
