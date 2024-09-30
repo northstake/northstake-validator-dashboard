@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { initializeApi, listWallets as list } from '../../app/api';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
+  if (req.method === 'GET') {
 
     try {
       const api =  initializeApi()
