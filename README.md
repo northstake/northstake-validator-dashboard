@@ -39,16 +39,19 @@ yarn install
 Create a `.env` file in the root directory and add the following environment variables:
 
 ```
-NEXT_PUBLIC_API_KEY=your_api_key
-NEXT_PUBLIC_PRIVATE_KEY=your_private_key
+API_KEY=your_api_key
+PRIVATE_KEY=your_private_key
+NEXT_PUBLIC_SERVER=<test|prod>
 ```
 
 Note that your private key is sensitive information and should not be exposed to the public.
 The private key should be one line, with line breaks replaced with `\n`. For example:
 
 ```
-NEXT_PUBLIC_API_KEY=your_api_key
-NEXT_PUBLIC_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQ5ZK8k+vR\n...
+API_KEY=your_api_key
+PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQ5ZK8k+vR\n...
+NEXT_PUBLIC_SERVER=<test|prod>
+
 ```
 
 ## Scripts
