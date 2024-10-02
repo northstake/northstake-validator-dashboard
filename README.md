@@ -44,14 +44,15 @@ PRIVATE_KEY=your_private_key
 NEXT_PUBLIC_SERVER=<test|production>
 ```
 
+**Note:** You will need a Northstake API key to use this code.
+
 Note that your private key is sensitive information and should not be exposed to the public.
 The private key should be one line, with line breaks replaced with `\n`. For example:
 
 ```
 API_KEY=your_api_key
-PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQ5ZK8k+vR\n...
+PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQ5ZK8k+vR\n...
 NEXT_PUBLIC_SERVER=<test|production>
-
 ```
 
 ## Scripts
