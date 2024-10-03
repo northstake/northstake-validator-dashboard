@@ -222,7 +222,7 @@ const ValidatorsTable = () => {
                       validator.status !== ('active' as string) ||
                       rfqs.some(rfq =>
                         rfq.validators.some(
-                          v => v.validator_index?.toString() === validator.validator_index?.toString()
+                          v => v.validator_index?.toString() === validator.validator_index?.toString() && rfq.status !== 'rejected'
                         )
                       )
                     }
